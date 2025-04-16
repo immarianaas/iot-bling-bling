@@ -49,7 +49,7 @@ bool loraWanAdr = false;
 bool isTxConfirmed = true;
 
 /* Application port */
-uint8_t appPort = 2;
+uint8_t appPort = 1;
 /*!
 * Number of trials to transmit the frame, if the LoRaMAC layer did not
 * receive an acknowledgment. The MAC performs a datarate adaptation,
@@ -82,11 +82,13 @@ static void prepareTxFrame( uint8_t port )
   *for example, if use REGION_CN470, 
   *the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
   */
+    Serial.print("[prepareTxFrame] ");
+    Serial.println(lastDownlinkMessage);
     appDataSize = 4;
     appData[0] = 0x00;
-    appData[1] = 0x01;
-    appData[2] = 0x02;
-    appData[3] = 0x03;
+    appData[1] = 0x00;
+    appData[2] = 0x00;
+    appData[3] = (int) lastDownlinkMessage[0];
 }
 
 //if true, next uplink will add MOTE_MAC_DEVICE_TIME_REQ 
@@ -148,10 +150,19 @@ void handleLoraWanStateMachine() {
   }
 }
 
+bool needsToReply = true;
+
 void loop()
 {
   handleLoraWanStateMachine();
 
-  Serial.println(lastDownlinkMessage);
+  if (lastDownlinkMessage != "")
+    Serial.println(lastDownlinkMessage);
+
+  if (newDownlinkMessage && needsToReply) 
+  {
+    needsToReply = false;
+    deviceState = DEVICE_STATE_SEND;
+  }
 
 }
