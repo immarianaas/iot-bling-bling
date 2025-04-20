@@ -1,6 +1,3 @@
-
-
-
 #ifndef My_LoRaWan_H
 #define My_LoRaWan_H
 #include "Arduino.h"

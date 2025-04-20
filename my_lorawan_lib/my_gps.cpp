@@ -1,0 +1,89 @@
+#include <my_gps.h>
+// #include <HardwareSerial.h>
+// #include <TinyGPS++.h>
+
+#define GPS_RX 6 // UART RX
+#define GPS_TX 7 // UART TX
+
+void My_GPS::init()
+{
+    GPSerial = &Serial1;
+
+    GPSerial->begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
+    GPSerial->setTimeout(3000);
+}
+
+bool My_GPS::get_coords(float &lat, float &lng)
+{
+    int now = millis();
+    int timeout = 1000 * 5; // 5 seconds
+    while (GPSerial->available() > 0 and timeout - millis() > 0)
+    {
+        int c = GPSerial->read();
+        gps.encode(c);
+        if (gps.location.isValid())
+        {
+            lat = gps.location.lat();
+            lng = gps.location.lng();
+            return true;
+        }
+    }
+    return false;
+}
+
+void My_GPS::encode_coord_val_hex(float val, int* arr)
+{
+    int normalized = (uint32_t)(((val + 90.0) / 180.0) * 16777215.0); // 16777216 = 2^(8*3) -1 (highest value written with 4 bytes
+
+    arr[0] = (normalized >> 16) & 0xFF;
+    arr[1] = (normalized >> 8) & 0xFF;
+    arr[2] = normalized & 0xFF;
+}
+
+float My_GPS::decode_coord_val_hex(int *bytes)
+{
+    // Combine the 3 bytes into a single 24-bit integer
+    int normalized = (bytes[0] << 16) | (bytes[1] << 8) | bytes[2];
+
+    // Reverse the normalization
+    float val = ((float)normalized / 16777215.0f) * 180.0f - 90.0f;
+
+    return val;
+}
+
+void My_GPS::prepare_message(bool valid, float lat, float lng, uint8_t *msg_buffer, uint8_t &msg_size)
+{
+    if (!valid)
+    {
+        msg_size = 1;
+        msg_buffer[0] = 0x10; // code for coordinates
+        return;
+    }
+
+    int latArr[3];
+    int lngArr[3];
+    encode_coord_val_hex(lat, latArr);
+    encode_coord_val_hex(lng, lngArr);
+
+    msg_size = 7;
+    msg_buffer[0] = 0x10; // code for coordinates
+    for (int i = 1; i < 4; ++i)
+    {
+        msg_buffer[i] = latArr[i - 1];
+    }
+    for (int i = 4; i < 7; ++i)
+    {
+        msg_buffer[i] = lngArr[i - 4];
+    }
+}
+
+void My_GPS::print_hex_arr_values(int *arr)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (arr[i] < 0x10)
+            Serial.print("0"); // leading zero
+        Serial.print(arr[i], HEX);
+    }
+    Serial.println();
+}

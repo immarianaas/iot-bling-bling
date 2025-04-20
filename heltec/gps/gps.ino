@@ -17,19 +17,82 @@ void setup(){
 
 }
 
+bool get_coords(float &lat, float &lng) {
+
+  int now = millis();
+  int timeout = 1000 * 5; // 5 seconds
+  while (GPSerial.available() > 0 and timeout - millis() > 0) {
+    int c = GPSerial.read();
+
+    gps.encode(c);
+    if (gps.location.isValid())
+    {
+      lat = gps.location.lat(); 
+      lng = gps.location.lng();
+      return true;
+    }
+  }
+  return false;
+}
+
+byte* encode_coord_val_hex(float val) {
+  int normalized = (uint32_t)(((val + 90.0) / 180.0) * 16777215.0); // 16777216 = 2^(8*3) -1 (highest value written with 4 bytes
+  
+  static byte byteArr[3];
+  byteArr[0] = (normalized >> 16) & 0xFF;
+  byteArr[1] = (normalized >> 8) & 0xFF;
+  byteArr[2] = normalized & 0xFF;
+  return byteArr;
+}
+
+void prepare_message(bool valid, float lat, float lng, uint8_t* msg_buffer, uint8_t* msg_size) {
+  if (!valid)
+  {
+    msg_size = 1;
+    msg_buffer[0] = 0x10; // code for coordinates
+    return;
+  }
+
+  byte[] latArr = encode_coord_val_hex(lat);
+  byte[] lngArr = encode_coord_val_hex(lng);
+  msg_size = 7;
+  msg_buffer[0] = 0x10; // code for coordinates
+  for (int i = 1; i<4; ++i)
+  {
+    msg_buffer[i] = latArr[i-1];
+  }
+  for (int i = 4; i<7; ++i)
+  {
+    msg_buffer[i] = lngArr[i-4];
+  }
+}
+
 void loop() {
 
-  while (GPSerial.available() > 0) {
-    int c = GPSerial.read();
-    Serial.write(c);
+  float lat, lng;
+  bool ok = get_coords(lat, lng);
 
-    if (gps.encode(c)) { Serial.println(); displayInfo();}
+  Serial.print("ok? ");
+  Serial.println(ok);
+
+  Serial.print("latitude: ");
+  Serial.println(lat, 6);
+  Serial.print("longitude: ");
+  Serial.println(lng, 6);
+
+
+  byte* latBytes = encode_coord_val_hex(lat);
+  byte* lngBytes = encode_coord_val_hex(lng);
+
+  // Print as hex
+  Serial.print("Latitude (hex): ");
+  for (int i = 0; i < 3; i++) {
+    if (latBytes[i] < 0x10) Serial.print("0");  // leading zero
+    Serial.print(latBytes[i], HEX);
   }
-  
-  
-  // Serial.println("hello");
-  // delay(2000);
-  
+  Serial.println();
+
+  delay(5000);
 }
 
 
