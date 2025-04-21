@@ -36,6 +36,60 @@ RTC_DATA_ATTR int8_t defaultDrForNoAdr = 3;
 RTC_DATA_ATTR int8_t defaultDrForNoAdr = 5;
 #endif
 
+//.-------
+/* OTAA para*/
+uint8_t devEui[] = { 0x00, 0x04, 0xA3, 0x0B, 0x01, 0x06, 0x51, 0xF7 };
+uint8_t appEui[] = { 0xBE, 0x7A, 0x00, 0x00, 0x00, 0x00, 0x16, 0x4F };
+uint8_t appKey[] = { 0x97, 0x28, 0x3F, 0x8F, 0x8A, 0x54, 0x76, 0x5C, 0x8A, 0xE7, 0x59, 0xF1, 0x52, 0x61, 0x3D, 0x7B };
+uint8_t nwkSKey[] = {0x0E, 0xA8, 0xF9, 0x9E, 0xD6, 0x73, 0xE6, 0x68, 0xE1, 0xFE, 0xA1, 0x8A, 0x24, 0x3C, 0xDC, 0xE0 };
+uint8_t appSKey[] = { 0x87, 0xE1, 0x51, 0x13, 0x20, 0x73, 0x0A, 0xE9, 0xC1, 0x1B, 0x9F, 0x04, 0x6E, 0x61, 0x71, 0x76 };
+uint32_t devAddr =  ( uint32_t )0x01310715;
+
+/*LoraWan channelsmask, default channels 0-7*/ 
+uint16_t userChannelsMask[6]={ 0x00FF,0x0000,0x0000,0x0000,0x0000,0x0000 };
+
+/*LoraWan region, select in arduino IDE tools*/
+LoRaMacRegion_t loraWanRegion = ACTIVE_REGION;
+
+/*LoraWan Class, Class A and Class C are supported*/
+DeviceClass_t  loraWanClass = CLASS_A;
+
+/*the application data transmission duty cycle.  value in [ms].*/
+uint32_t appTxDutyCycle = 15000;
+
+/*OTAA or ABP*/
+bool overTheAirActivation = true;
+
+/*ADR enable*/
+bool loraWanAdr = false;
+
+/* Indicates if the node is sending confirmed or unconfirmed messages */
+bool isTxConfirmed = true;
+
+/* Application port */
+uint8_t appPort = 1;
+/*!
+* Number of trials to transmit the frame, if the LoRaMAC layer did not
+* receive an acknowledgment. The MAC performs a datarate adaptation,
+* according to the LoRaWAN Specification V1.0.2, chapter 18.4, according
+* to the following table:
+*
+* Transmission nb | Data Rate
+* ----------------|-----------
+* 1 (first)       | DR
+* 2               | DR
+* 3               | max(DR-1,0)
+* 4               | max(DR-1,0)
+* 5               | max(DR-2,0)
+* 6               | max(DR-2,0)
+* 7               | max(DR-3,0)
+* 8               | max(DR-3,0)
+*
+* Note, that if NbTrials is set to 1 or 2, the MAC will not decrease
+* the datarate, in case the LoRaMAC layer did not receive an acknowledgment
+*/
+uint8_t confirmedNbTrials = 4;
+//--------------------
 
 RTC_DATA_ATTR uint8_t debugLevel=LoRaWAN_DEBUG_LEVEL;
 

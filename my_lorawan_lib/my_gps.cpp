@@ -5,21 +5,26 @@
 #define GPS_RX 6 // UART RX
 #define GPS_TX 7 // UART TX
 
+My_GPS::My_GPS() : gps(), GPSerial(1) {
+    GPSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
+    GPSerial.setTimeout(3000);
+}
+
 void My_GPS::init()
 {
-    GPSerial = &Serial1;
+    // GPSerial = &Serial1;
 
-    GPSerial->begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
-    GPSerial->setTimeout(3000);
+    GPSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
+    GPSerial.setTimeout(3000);
 }
 
 bool My_GPS::get_coords(float &lat, float &lng)
 {
     int now = millis();
     int timeout = 1000 * 5; // 5 seconds
-    while (GPSerial->available() > 0 and timeout - millis() > 0)
+    while (GPSerial.available() > 0 and timeout - millis() > 0)
     {
-        int c = GPSerial->read();
+        int c = GPSerial.read();
         gps.encode(c);
         if (gps.location.isValid())
         {
@@ -31,7 +36,7 @@ bool My_GPS::get_coords(float &lat, float &lng)
     return false;
 }
 
-void My_GPS::encode_coord_val_hex(float val, int* arr)
+void My_GPS::encode_coord_val_hex(float val, int *arr)
 {
     int normalized = (uint32_t)(((val + 90.0) / 180.0) * 16777215.0); // 16777216 = 2^(8*3) -1 (highest value written with 4 bytes
 
@@ -86,4 +91,11 @@ void My_GPS::print_hex_arr_values(int *arr)
         Serial.print(arr[i], HEX);
     }
     Serial.println();
+}
+
+void My_GPS::prepare_coords_msg(uint8_t *msg_buffer, uint8_t &msg_size)
+{
+    float lat, lng;
+    bool ok = get_coords(lat, lng);
+    prepare_message(ok, lat, lng, msg_buffer, msg_size);
 }

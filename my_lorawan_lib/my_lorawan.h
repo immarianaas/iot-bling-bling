@@ -43,12 +43,7 @@ enum eDeviceState_Lora
 };
 
 
-extern uint8_t devEui[];
-extern uint8_t appEui[];
-extern uint8_t appKey[];
-extern uint8_t nwkSKey[];
-extern uint8_t appSKey[];
-extern uint32_t devAddr;
+
 extern uint8_t appData[LORAWAN_APP_DATA_MAX_SIZE];
 extern uint8_t appDataSize;
 extern uint8_t appPort;
