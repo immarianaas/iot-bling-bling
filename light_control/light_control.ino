@@ -4,7 +4,12 @@
 int ledPin = LED_BUILTIN;  //led output
      
 const int photoPin = 36;  // GPIO36 (VP)
-bool tap = 0;             //indicates if TAP detected
+const int buttonPin = 18;
+
+//bool tap = 0;             //indicates if TAP detected
+bool lastButtonState = HIGH;  // Previous button state
+
+
 bool manual = 0;          //indicates if light manually turned on
 
 unsigned long lastMoveTime = 0;               //timer for light turn off after x time
@@ -31,14 +36,14 @@ void setup() {
     ADXL345.activityInt(true);  // Enable activity interrupt system
 
     // Detect taps in the directions turned ON(1 == ON, 0 == OFF)
-    ADXL345.setTapDetectionOnX(0);
-    ADXL345.setTapDetectionOnY(0);
-    ADXL345.setTapDetectionOnZ(1);
+    //ADXL345.setTapDetectionOnX(0);
+    //ADXL345.setTapDetectionOnY(0);
+    //ADXL345.setTapDetectionOnZ(1);
     
-    ADXL345.setTapThreshold(20); //tap threshhold, low = more sensitive 
-    ADXL345.setTapDuration(15);  //tap duration
+    //ADXL345.setTapThreshold(20); //tap threshhold, low = more sensitive 
+    //ADXL345.setTapDuration(15);  //tap duration
 
-    ADXL345.singleTapInt(1);    //enable tap interrupt
+    //ADXL345.singleTapInt(1);    //enable tap interrupt
 }
 
 void loop() {
@@ -49,20 +54,36 @@ void loop() {
     Serial.println("Analog  Value: ");
     Serial.println(value);
     
-    if (tap == true) {              //if tap sensed, manage manual on/off
-      if (manual == 0) {
-        digitalWrite(ledPin, HIGH);
-        manual = 1;
-      } else {
-      digitalWrite(ledPin, LOW);
-        manual = 0;
-      }
-    tap = false;
+    //if (tap == true) {              //if tap sensed, manage manual on/off
+    //  if (manual == 0) {
+    //    digitalWrite(ledPin, HIGH);
+    //    manual = 1;
+    //  } else {
+    //  digitalWrite(ledPin, LOW);
+    //    manual = 0;
+    //  }
+    //tap = false;
     
-    } else if (manual == true) {                                        //if manual on, keep on till manual off
+    //} else if (manual == true) {                                        //if manual on, keep on till manual off
+    //  digitalWrite(ledPin, HIGH);
+    
+    //for button instead
+    if (digitalRead(buttonPin) == LOW and lastButtonState == HIGH) {
       digitalWrite(ledPin, HIGH);
+      lastButtonState = LOW;
+      manual = 1;
     
-    } else if ((value < 2100) and (ADXL345.isActivitySourceOnX()or      //else if dark and moving, turn light on
+    } else if (digitalRead(buttonPin) == LOW and lastButtonState == LOW) {
+      digitalWrite(ledPin, LOW);
+      lastButtonState = HIGH;
+      manual = 0;
+    }
+
+    // Manual ON keeps light ON
+    else if (manual) {
+        digitalWrite(ledPin, HIGH);
+    
+    } else if ((value < 2600) and (ADXL345.isActivitySourceOnX()or      //else if dark and moving, turn light on
                               ADXL345.isActivitySourceOnY()or 
                               ADXL345.isActivitySourceOnZ())) {         // threshold 2100 relatively good for 10k resistor 
         digitalWrite(ledPin, HIGH);
@@ -75,10 +96,10 @@ void loop() {
     }
 
     // Tap Detection
-    if(ADXL345.triggered(interrupts, ADXL345_SINGLE_TAP)){          //tap detection interrupt
-      Serial.println("*** TAP ***");
-      tap = true;
-    }
+    //if(ADXL345.triggered(interrupts, ADXL345_SINGLE_TAP)){          //tap detection interrupt
+    //  Serial.println("*** TAP ***");
+    //  tap = true;
+    //}
     Serial.println(manual);
-    delay(500);
+    delay(150); //important for button
 }
