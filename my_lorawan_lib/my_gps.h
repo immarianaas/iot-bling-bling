@@ -10,7 +10,6 @@ class My_GPS
 public:
 
     My_GPS();
-    void init();
     bool get_coords(float &lat, float &lng);
     void encode_coord_val_hex(float val, int*arr);
     float decode_coord_val_hex(int *bytes);

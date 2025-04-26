@@ -61,7 +61,7 @@ extern bool keepNet;
 extern uint16_t userChannelsMask[6];
 
 extern bool newDownlinkMessage;
-extern char* lastDownlinkMessage;
+extern char lastDownlinkMessage[256];
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,

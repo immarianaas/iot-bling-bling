@@ -10,14 +10,6 @@ My_GPS::My_GPS() : gps(), GPSerial(1) {
     GPSerial.setTimeout(3000);
 }
 
-void My_GPS::init()
-{
-    // GPSerial = &Serial1;
-
-    GPSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
-    GPSerial.setTimeout(3000);
-}
-
 bool My_GPS::get_coords(float &lat, float &lng)
 {
     int now = millis();

@@ -1,10 +1,11 @@
 
 #include <my_lorawan.h>
 #include <my_gps.h>
-
+#include <my_wifi_location.h>
 //// use this devEUI: 0004A30B010651F7
 
 My_GPS mygps;
+My_Wifi_Location mywifiloc;
 
 /* Prepares the payload of the frame */
 static void prepareTxFrame( uint8_t port )
@@ -26,7 +27,8 @@ void setup() {
   delay(3000);
   Serial.println("hello?");
   Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE);
-  // mygps.init();
+  mywifiloc.init();
+
 }
 
 void handleLoraWanStateMachine() {
@@ -53,9 +55,13 @@ void handleLoraWanStateMachine() {
     case DEVICE_STATE_SEND:
     {
       Serial.println("DEVICE_STATE_SEND");
-      prepareTxFrame( appPort );
-      mygps.prepare_coords_msg(appData, appDataSize);
+      // prepareTxFrame( appPort );
+      //mygps.prepare_coords_msg(appData, appDataSize);
+      //LoRaWAN.send();
+      //Serial.println("sent first");
+      mywifiloc.prepare_wifi_msg(appData, appDataSize);
       LoRaWAN.send();
+      Serial.println("sent second");
       deviceState = DEVICE_STATE_CYCLE;
       break;
     }
@@ -89,8 +95,13 @@ void loop()
 {
   handleLoraWanStateMachine();
 
-  if (lastDownlinkMessage != "")
-    Serial.println(lastDownlinkMessage);
+  if (lastDownlinkMessage[0] != 0)
+  {
+    Serial.print("|");
+    Serial.print(lastDownlinkMessage);
+    Serial.println("|");
+
+  }
 
   if (newDownlinkMessage && needsToReply) 
   {

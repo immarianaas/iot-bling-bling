@@ -141,7 +141,7 @@ RTC_DATA_ATTR static bool nextTx = true;
 RTC_DATA_ATTR enum eDeviceState_LoraWan deviceState=DEVICE_STATE_INIT;
 
 RTC_DATA_ATTR bool newDownlinkMessage = false;
-RTC_DATA_ATTR char* lastDownlinkMessage = new char[256]();
+RTC_DATA_ATTR char lastDownlinkMessage[256] = "";
 
 /*!
  * \brief   Prepares the payload of the frame
@@ -190,9 +190,11 @@ bool SendFrame( void )
 
 	if( LoRaMacMcpsRequest( &mcpsReq ) == LORAMAC_STATUS_OK )
 	{
-		return false;
+		// return true; // note: I switched these two 
+		return false; // original
 	}
-	return true;
+	// return false;
+	return true; // original
 }
 
 /*!
