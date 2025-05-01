@@ -56,11 +56,11 @@ void handleLoraWanStateMachine() {
     {
       Serial.println("DEVICE_STATE_SEND");
       // prepareTxFrame( appPort );
-      //mygps.prepare_coords_msg(appData, appDataSize);
-      //LoRaWAN.send();
-      //Serial.println("sent first");
-      mywifiloc.prepare_wifi_msg(appData, appDataSize);
+      mygps.prepare_coords_msg(appData, appDataSize);
       LoRaWAN.send();
+      //Serial.println("sent first");
+      // mywifiloc.prepare_wifi_msg(appData, appDataSize);
+      // LoRaWAN.send();
       Serial.println("sent second");
       deviceState = DEVICE_STATE_CYCLE;
       break;
@@ -98,7 +98,11 @@ void loop()
   if (lastDownlinkMessage[0] != 0)
   {
     Serial.print("|");
-    Serial.print(lastDownlinkMessage);
+    int i = 0;
+    while (lastDownlinkMessage[i] != 0)
+    {
+      Serial.print(lastDownlinkMessage[i++], HEX);
+    }
     Serial.println("|");
 
   }

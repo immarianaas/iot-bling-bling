@@ -1,32 +1,33 @@
 #include <my_lorawan.h>
 #include <Arduino.h>
-#if !defined(HT_DE01)&&!defined(WIFI_Kit_32)&&!defined(WIFI_Kit_32_V3)
-#if(LoraWan_RGB==1)
+#if !defined(HT_DE01) && !defined(WIFI_Kit_32) && !defined(WIFI_Kit_32_V3)
+#if (LoraWan_RGB == 1)
 #include "CubeCell_NeoPixel.h"
 CubeCell_NeoPixel pixels(1, RGB, NEO_GRB + NEO_KHZ800);
 #endif
 
-#if defined( REGION_EU868 )
+#if defined(REGION_EU868)
 #include "loramac/region/RegionEU868.h"
-#elif defined( REGION_EU433 )
+#elif defined(REGION_EU433)
 #include "loramac/region/RegionEU433.h"
-#elif defined( REGION_KR920 )
+#elif defined(REGION_KR920)
 #include "loramac/region/RegionKR920.h"
-#elif defined( REGION_AS923) || defined( REGION_AS923_AS1) || defined( REGION_AS923_AS2)
+#elif defined(REGION_AS923) || defined(REGION_AS923_AS1) || defined(REGION_AS923_AS2)
 #include "loramac/region/RegionAS923.h"
 #endif
 
-
-#if defined(WIFI_LORA_32_V3)||defined(WIFI_LORA_32_V2)||defined(WIFI_LORA_32)||defined(WIRELESS_STICK_V3)||defined(WIRELESS_STICK)
-#include <Wire.h>  
+#if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK_V3) || defined(WIRELESS_STICK)
+#include <Wire.h>
 #include "HT_SSD1306Wire.h"
-RTC_DATA_ATTR uint8_t ifDisplayAck=0;
-RTC_DATA_ATTR uint8_t isDispayOn=0;
-  #ifdef WIRELESS_STICK_V3
-RTC_DATA_ATTR  SSD1306Wire  display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_64_32, RST_OLED);; // addr , freq , i2c group , resolution , rst
-  #else
-RTC_DATA_ATTR SSD1306Wire  display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);; // addr , freq , i2c group , resolution , rst
-  #endif
+RTC_DATA_ATTR uint8_t ifDisplayAck = 0;
+RTC_DATA_ATTR uint8_t isDispayOn = 0;
+#ifdef WIRELESS_STICK_V3
+RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_64_32, RST_OLED);
+; // addr , freq , i2c group , resolution , rst
+#else
+RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
+; // addr , freq , i2c group , resolution , rst
+#endif
 #endif
 
 /*loraWan default Dr when adr disabled*/
@@ -38,21 +39,21 @@ RTC_DATA_ATTR int8_t defaultDrForNoAdr = 5;
 
 //.-------
 /* OTAA para*/
-uint8_t devEui[] = { 0x00, 0x04, 0xA3, 0x0B, 0x01, 0x06, 0x51, 0xF7 };
-uint8_t appEui[] = { 0xBE, 0x7A, 0x00, 0x00, 0x00, 0x00, 0x16, 0x4F };
-uint8_t appKey[] = { 0x97, 0x28, 0x3F, 0x8F, 0x8A, 0x54, 0x76, 0x5C, 0x8A, 0xE7, 0x59, 0xF1, 0x52, 0x61, 0x3D, 0x7B };
-uint8_t nwkSKey[] = {0x0E, 0xA8, 0xF9, 0x9E, 0xD6, 0x73, 0xE6, 0x68, 0xE1, 0xFE, 0xA1, 0x8A, 0x24, 0x3C, 0xDC, 0xE0 };
-uint8_t appSKey[] = { 0x87, 0xE1, 0x51, 0x13, 0x20, 0x73, 0x0A, 0xE9, 0xC1, 0x1B, 0x9F, 0x04, 0x6E, 0x61, 0x71, 0x76 };
-uint32_t devAddr =  ( uint32_t )0x01310715;
+uint8_t devEui[] = {0x00, 0x04, 0xA3, 0x0B, 0x01, 0x06, 0x51, 0xF7};
+uint8_t appEui[] = {0xBE, 0x7A, 0x00, 0x00, 0x00, 0x00, 0x16, 0x4F};
+uint8_t appKey[] = {0x97, 0x28, 0x3F, 0x8F, 0x8A, 0x54, 0x76, 0x5C, 0x8A, 0xE7, 0x59, 0xF1, 0x52, 0x61, 0x3D, 0x7B};
+uint8_t nwkSKey[] = {0x0E, 0xA8, 0xF9, 0x9E, 0xD6, 0x73, 0xE6, 0x68, 0xE1, 0xFE, 0xA1, 0x8A, 0x24, 0x3C, 0xDC, 0xE0};
+uint8_t appSKey[] = {0x87, 0xE1, 0x51, 0x13, 0x20, 0x73, 0x0A, 0xE9, 0xC1, 0x1B, 0x9F, 0x04, 0x6E, 0x61, 0x71, 0x76};
+uint32_t devAddr = (uint32_t)0x01310715;
 
-/*LoraWan channelsmask, default channels 0-7*/ 
-uint16_t userChannelsMask[6]={ 0x00FF,0x0000,0x0000,0x0000,0x0000,0x0000 };
+/*LoraWan channelsmask, default channels 0-7*/
+uint16_t userChannelsMask[6] = {0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 
 /*LoraWan region, select in arduino IDE tools*/
 LoRaMacRegion_t loraWanRegion = ACTIVE_REGION;
 
 /*LoraWan Class, Class A and Class C are supported*/
-DeviceClass_t  loraWanClass = CLASS_A;
+DeviceClass_t loraWanClass = CLASS_A;
 
 /*the application data transmission duty cycle.  value in [ms].*/
 uint32_t appTxDutyCycle = 15000;
@@ -69,29 +70,29 @@ bool isTxConfirmed = true;
 /* Application port */
 uint8_t appPort = 1;
 /*!
-* Number of trials to transmit the frame, if the LoRaMAC layer did not
-* receive an acknowledgment. The MAC performs a datarate adaptation,
-* according to the LoRaWAN Specification V1.0.2, chapter 18.4, according
-* to the following table:
-*
-* Transmission nb | Data Rate
-* ----------------|-----------
-* 1 (first)       | DR
-* 2               | DR
-* 3               | max(DR-1,0)
-* 4               | max(DR-1,0)
-* 5               | max(DR-2,0)
-* 6               | max(DR-2,0)
-* 7               | max(DR-3,0)
-* 8               | max(DR-3,0)
-*
-* Note, that if NbTrials is set to 1 or 2, the MAC will not decrease
-* the datarate, in case the LoRaMAC layer did not receive an acknowledgment
-*/
+ * Number of trials to transmit the frame, if the LoRaMAC layer did not
+ * receive an acknowledgment. The MAC performs a datarate adaptation,
+ * according to the LoRaWAN Specification V1.0.2, chapter 18.4, according
+ * to the following table:
+ *
+ * Transmission nb | Data Rate
+ * ----------------|-----------
+ * 1 (first)       | DR
+ * 2               | DR
+ * 3               | max(DR-1,0)
+ * 4               | max(DR-1,0)
+ * 5               | max(DR-2,0)
+ * 6               | max(DR-2,0)
+ * 7               | max(DR-3,0)
+ * 8               | max(DR-3,0)
+ *
+ * Note, that if NbTrials is set to 1 or 2, the MAC will not decrease
+ * the datarate, in case the LoRaMAC layer did not receive an acknowledgment
+ */
 uint8_t confirmedNbTrials = 4;
 //--------------------
 
-RTC_DATA_ATTR uint8_t debugLevel=LoRaWAN_DEBUG_LEVEL;
+RTC_DATA_ATTR uint8_t debugLevel = LoRaWAN_DEBUG_LEVEL;
 
 /*AT mode, auto into low power mode*/
 RTC_DATA_ATTR bool autoLPM = true;
@@ -109,11 +110,10 @@ RTC_DATA_ATTR uint8_t appDataSize = 0;
  */
 RTC_DATA_ATTR uint8_t appData[LORAWAN_APP_DATA_MAX_SIZE];
 
-
 /*!
  * Defines the application data transmission duty cycle
  */
-RTC_DATA_ATTR uint32_t txDutyCycleTime ;
+RTC_DATA_ATTR uint32_t txDutyCycleTime;
 
 /*!
  * Timer to handle the application data transmission duty cycle
@@ -121,13 +121,13 @@ RTC_DATA_ATTR uint32_t txDutyCycleTime ;
 RTC_DATA_ATTR TimerEvent_t TxNextPacketTimer;
 
 /*!
- * PassthroughMode mode enable/disable. don't modify it here. 
- * when use PassthroughMode, set it true in app.ino , Reference the example PassthroughMode.ino 
+ * PassthroughMode mode enable/disable. don't modify it here.
+ * when use PassthroughMode, set it true in app.ino , Reference the example PassthroughMode.ino
  */
 bool passthroughMode = false;
 
 /*!
- * when use PassthroughMode, Mode_LoraWan to set use lora or lorawan mode . don't modify it here. 
+ * when use PassthroughMode, Mode_LoraWan to set use lora or lorawan mode . don't modify it here.
  * it is used to set mode lora/lorawan in PassthroughMode.
  */
 bool modeLoraWan = true;
@@ -137,8 +137,7 @@ bool modeLoraWan = true;
  */
 RTC_DATA_ATTR static bool nextTx = true;
 
-
-RTC_DATA_ATTR enum eDeviceState_LoraWan deviceState=DEVICE_STATE_INIT;
+RTC_DATA_ATTR enum eDeviceState_LoraWan deviceState = DEVICE_STATE_INIT;
 
 RTC_DATA_ATTR bool newDownlinkMessage = false;
 RTC_DATA_ATTR char lastDownlinkMessage[256] = "";
@@ -148,14 +147,14 @@ RTC_DATA_ATTR char lastDownlinkMessage[256] = "";
  *
  * \retval  [0: frame could be send, 1: error]
  */
-bool SendFrame( void )
+bool SendFrame(void)
 {
 	lwan_dev_params_update();
-	
+
 	McpsReq_t mcpsReq;
 	LoRaMacTxInfo_t txInfo;
 	LORAWANLOG;
-	if( LoRaMacQueryTxPossible( appDataSize, &txInfo ) != LORAMAC_STATUS_OK )
+	if (LoRaMacQueryTxPossible(appDataSize, &txInfo) != LORAMAC_STATUS_OK)
 	{
 		// Send empty frame in order to flush MAC commands
 		printf("payload length error ...\r\n");
@@ -163,11 +162,11 @@ bool SendFrame( void )
 		mcpsReq.Req.Unconfirmed.fBuffer = NULL;
 		mcpsReq.Req.Unconfirmed.fBufferSize = 0;
 		mcpsReq.Req.Unconfirmed.Datarate = currentDrForNoAdr;
-		//return false;
+		// return false;
 	}
 	else
 	{
-		if( isTxConfirmed == false )
+		if (isTxConfirmed == false)
 		{
 			printf("unconfirmed uplink sending ...\r\n");
 			mcpsReq.Type = MCPS_UNCONFIRMED;
@@ -188,9 +187,9 @@ bool SendFrame( void )
 		}
 	}
 
-	if( LoRaMacMcpsRequest( &mcpsReq ) == LORAMAC_STATUS_OK )
+	if (LoRaMacMcpsRequest(&mcpsReq) == LORAMAC_STATUS_OK)
 	{
-		// return true; // note: I switched these two 
+		// return true; // note: I switched these two
 		return false; // original
 	}
 	// return false;
@@ -200,19 +199,19 @@ bool SendFrame( void )
 /*!
  * \brief Function executed on TxNextPacket Timeout event
  */
-static void OnTxNextPacketTimerEvent( void )
+static void OnTxNextPacketTimerEvent(void)
 {
 	MibRequestConfirm_t mibReq;
 	LoRaMacStatus_t status;
 
-	TimerStop( &TxNextPacketTimer );
+	TimerStop(&TxNextPacketTimer);
 
 	mibReq.Type = MIB_NETWORK_JOINED;
-	status = LoRaMacMibGetRequestConfirm( &mibReq );
+	status = LoRaMacMibGetRequestConfirm(&mibReq);
 
-	if( status == LORAMAC_STATUS_OK )
+	if (status == LORAMAC_STATUS_OK)
 	{
-		if( mibReq.Param.IsNetworkJoined == true )
+		if (mibReq.Param.IsNetworkJoined == true)
 		{
 			deviceState = DEVICE_STATE_SEND;
 			nextTx = true;
@@ -227,7 +226,7 @@ static void OnTxNextPacketTimerEvent( void )
 			mlmeReq.Req.Join.AppKey = appKey;
 			mlmeReq.Req.Join.NbTrials = 1;
 
-			if( LoRaMacMlmeRequest( &mlmeReq ) == LORAMAC_STATUS_OK )
+			if (LoRaMacMlmeRequest(&mlmeReq) == LORAMAC_STATUS_OK)
 			{
 				deviceState = DEVICE_STATE_SLEEP;
 			}
@@ -245,54 +244,50 @@ static void OnTxNextPacketTimerEvent( void )
  * \param   [IN] mcpsConfirm - Pointer to the confirm structure,
  *               containing confirm attributes.
  */
-static void McpsConfirm( McpsConfirm_t *mcpsConfirm )
+static void McpsConfirm(McpsConfirm_t *mcpsConfirm)
 {
-	if( mcpsConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
+	if (mcpsConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK)
 	{
-		switch( mcpsConfirm->McpsRequest )
+		switch (mcpsConfirm->McpsRequest)
 		{
-			case MCPS_UNCONFIRMED:
-			{
-				// Check Datarate
-				// Check TxPower
-				break;
-			}
-			case MCPS_CONFIRMED:
-			{
-				// Check Datarate
-				// Check TxPower
-				// Check AckReceived
-				// Check NbTrials
-				break;
-			}
-			case MCPS_PROPRIETARY:
-			{
-				break;
-			}
-			default:
-				break;
+		case MCPS_UNCONFIRMED:
+		{
+			// Check Datarate
+			// Check TxPower
+			break;
+		}
+		case MCPS_CONFIRMED:
+		{
+			// Check Datarate
+			// Check TxPower
+			// Check AckReceived
+			// Check NbTrials
+			break;
+		}
+		case MCPS_PROPRIETARY:
+		{
+			break;
+		}
+		default:
+			break;
 		}
 	}
 	nextTx = true;
 }
 
-
-
-
-
 void __attribute__((weak)) downLinkAckHandle()
 {
-	//printf("ack received\r\n");
+	// printf("ack received\r\n");
 }
 
 void __attribute__((weak)) downLinkDataHandle(McpsIndication_t *mcpsIndication)
 {
-	printf("+REV DATA:%s,RXSIZE %d,PORT %d\r\n",mcpsIndication->RxSlot?"RXWIN2":"RXWIN1",mcpsIndication->BufferSize,mcpsIndication->Port);
+	printf("+REV DATA:%s,RXSIZE %d,PORT %d\r\n", mcpsIndication->RxSlot ? "RXWIN2" : "RXWIN1", mcpsIndication->BufferSize, mcpsIndication->Port);
 	printf("+REV DATA:");
 	uint8_t i = 0;
-	for(;i<mcpsIndication->BufferSize;i++)
+	for (; i < mcpsIndication->BufferSize; i++)
 	{
-		printf("%02X",mcpsIndication->Buffer[i]);
+		printf("%02X", mcpsIndication->Buffer[i]);
 		lastDownlinkMessage[i] = mcpsIndication->Buffer[i];
 	}
 	lastDownlinkMessage[i] = 0;
@@ -305,57 +300,56 @@ void __attribute__((weak)) downLinkDataHandle(McpsIndication_t *mcpsIndication)
  * \param   [IN] mcpsIndication - Pointer to the indication structure,
  *               containing indication attributes.
  */
-RTC_DATA_ATTR int revrssi,revsnr;
-static void McpsIndication( McpsIndication_t *mcpsIndication )
+RTC_DATA_ATTR int revrssi, revsnr;
+static void McpsIndication(McpsIndication_t *mcpsIndication)
 {
-	if( mcpsIndication->Status != LORAMAC_EVENT_INFO_STATUS_OK )
+	if (mcpsIndication->Status != LORAMAC_EVENT_INFO_STATUS_OK)
 	{
 		return;
 	}
-#if defined(WIFI_LORA_32_V3)||defined(WIFI_LORA_32_V2)||defined(WIRELESS_STICK_V3)||defined( WIFI_LORA_32 )||defined(WIRELESS_STICK)
-	ifDisplayAck=1;
-	revrssi=mcpsIndication->Rssi;
-	revsnr=mcpsIndication->Snr;
+#if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIRELESS_STICK_V3) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK)
+	ifDisplayAck = 1;
+	revrssi = mcpsIndication->Rssi;
+	revsnr = mcpsIndication->Snr;
 #endif
 
-
 	LORAWANLOG;
-	printf( "received ");
-	switch( mcpsIndication->McpsIndication )
+	printf("received ");
+	switch (mcpsIndication->McpsIndication)
 	{
-		case MCPS_UNCONFIRMED:
-		{
-			printf( "unconfirmed ");
-			break;
-		}
-		case MCPS_CONFIRMED:
-		{
-			printf( "confirmed ");
-			OnTxNextPacketTimerEvent( );
-			break;
-		}
-		case MCPS_PROPRIETARY:
-		{
-			printf( "proprietary ");
-			break;
-		}
-		case MCPS_MULTICAST:
-		{
-			printf( "multicast ");
-			break;
-		}
-		default:
-			break;
+	case MCPS_UNCONFIRMED:
+	{
+		printf("unconfirmed ");
+		break;
 	}
-	printf( "downlink: rssi = %d, snr = %d, datarate = %d\r\n", mcpsIndication->Rssi, (int)mcpsIndication->Snr,(int)mcpsIndication->RxDoneDatarate);
+	case MCPS_CONFIRMED:
+	{
+		printf("confirmed ");
+		OnTxNextPacketTimerEvent();
+		break;
+	}
+	case MCPS_PROPRIETARY:
+	{
+		printf("proprietary ");
+		break;
+	}
+	case MCPS_MULTICAST:
+	{
+		printf("multicast ");
+		break;
+	}
+	default:
+		break;
+	}
+	printf("downlink: rssi = %d, snr = %d, datarate = %d\r\n", mcpsIndication->Rssi, (int)mcpsIndication->Snr, (int)mcpsIndication->RxDoneDatarate);
 
-	if(mcpsIndication->AckReceived)
+	if (mcpsIndication->AckReceived)
 	{
 		downLinkAckHandle();
 	}
 
 	newDownlinkMessage = false;
-	if( mcpsIndication->RxData == true )
+	if (mcpsIndication->RxData == true)
 	{
 		newDownlinkMessage = true;
 		downLinkDataHandle(mcpsIndication);
@@ -365,11 +359,11 @@ static void McpsIndication( McpsIndication_t *mcpsIndication )
 	// Check Port
 	// Check Datarate
 	// Check FramePending
-	if( mcpsIndication->FramePending == true )
+	if (mcpsIndication->FramePending == true)
 	{
 		// The server signals that it has pending data to be sent.
 		// We schedule an uplink as soon as possible to flush the server.
-		OnTxNextPacketTimerEvent( );
+		OnTxNextPacketTimerEvent();
 	}
 	// Check Buffer
 	// Check BufferSize
@@ -379,7 +373,6 @@ static void McpsIndication( McpsIndication_t *mcpsIndication )
 
 	delay(10);
 }
-
 
 void __attribute__((weak)) dev_time_updated()
 {
@@ -392,60 +385,60 @@ void __attribute__((weak)) dev_time_updated()
  * \param   [IN] mlmeConfirm - Pointer to the confirm structure,
  *               containing confirm attributes.
  */
-static void MlmeConfirm( MlmeConfirm_t *mlmeConfirm )
+static void MlmeConfirm(MlmeConfirm_t *mlmeConfirm)
 {
-	switch( mlmeConfirm->MlmeRequest )
+	switch (mlmeConfirm->MlmeRequest)
 	{
-		case MLME_JOIN:
+	case MLME_JOIN:
+	{
+		if (mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK)
 		{
-			if( mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
-			{
 
-#if defined(WIFI_LORA_32_V3)||defined(WIFI_LORA_32_V2)||defined(WIRELESS_STICK_V3)||defined( WIFI_LORA_32 )||defined(WIRELESS_STICK)
-				if(isDispayOn)
-				{
-					LoRaWAN.displayJoined();
-				}
+#if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIRELESS_STICK_V3) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK)
+			if (isDispayOn)
+			{
+				LoRaWAN.displayJoined();
+			}
 #endif
-				LORAWANLOG;
-				printf("joined\r\n");
-				
-				//in PassthroughMode,do nothing while joined
-				if(passthroughMode == false)
-				{
-					// Status is OK, node has joined the network
-					deviceState = DEVICE_STATE_SEND;
-				}
-			}
-			else
+			LORAWANLOG;
+			printf("joined\r\n");
+
+			// in PassthroughMode,do nothing while joined
+			if (passthroughMode == false)
 			{
-				uint32_t rejoin_delay = 30000;
-				printf("join failed, join again at 30s later\r\n");
-				delay(5);
-				TimerSetValue( &TxNextPacketTimer, rejoin_delay );
-				TimerStart( &TxNextPacketTimer );
+				// Status is OK, node has joined the network
+				deviceState = DEVICE_STATE_SEND;
 			}
-			break;
 		}
-		case MLME_LINK_CHECK:
+		else
 		{
-			if( mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
-			{
-				// Check DemodMargin
-				// Check NbGateways
-			}
-			break;
+			uint32_t rejoin_delay = 30000;
+			printf("join failed, join again at 30s later\r\n");
+			delay(5);
+			TimerSetValue(&TxNextPacketTimer, rejoin_delay);
+			TimerStart(&TxNextPacketTimer);
 		}
-		case MLME_DEVICE_TIME:
+		break;
+	}
+	case MLME_LINK_CHECK:
+	{
+		if (mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK)
 		{
-			if( mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
-			{
-				dev_time_updated();
-			}
-			break;
+			// Check DemodMargin
+			// Check NbGateways
 		}
-		default:
-			break;
+		break;
+	}
+	case MLME_DEVICE_TIME:
+	{
+		if (mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK)
+		{
+			dev_time_updated();
+		}
+		break;
+	}
+	default:
+		break;
 	}
 	nextTx = true;
 }
@@ -455,48 +448,47 @@ static void MlmeConfirm( MlmeConfirm_t *mlmeConfirm )
  *
  * \param   [IN] mlmeIndication - Pointer to the indication structure.
  */
-static void MlmeIndication( MlmeIndication_t *mlmeIndication )
+static void MlmeIndication(MlmeIndication_t *mlmeIndication)
 {
-	switch( mlmeIndication->MlmeIndication )
+	switch (mlmeIndication->MlmeIndication)
 	{
-		case MLME_SCHEDULE_UPLINK:
-		{// The MAC signals that we shall provide an uplink as soon as possible
-			OnTxNextPacketTimerEvent( );
-			break;
-		}
-		default:
-			break;
+	case MLME_SCHEDULE_UPLINK:
+	{ // The MAC signals that we shall provide an uplink as soon as possible
+		OnTxNextPacketTimerEvent();
+		break;
+	}
+	default:
+		break;
 	}
 }
 
-
-void lwan_dev_params_update( void )
+void lwan_dev_params_update(void)
 {
-#if defined( REGION_EU868 )
-	LoRaMacChannelAdd( 3, ( ChannelParams_t )EU868_LC4 );
-	LoRaMacChannelAdd( 4, ( ChannelParams_t )EU868_LC5 );
-	LoRaMacChannelAdd( 5, ( ChannelParams_t )EU868_LC6 );
-	LoRaMacChannelAdd( 6, ( ChannelParams_t )EU868_LC7 );
-	LoRaMacChannelAdd( 7, ( ChannelParams_t )EU868_LC8 );
-#elif defined( REGION_EU433 )
-	LoRaMacChannelAdd( 3, ( ChannelParams_t )EU433_LC4 );
-	LoRaMacChannelAdd( 4, ( ChannelParams_t )EU433_LC5 );
-	LoRaMacChannelAdd( 5, ( ChannelParams_t )EU433_LC6 );
-	LoRaMacChannelAdd( 6, ( ChannelParams_t )EU433_LC7 );
-	LoRaMacChannelAdd( 7, ( ChannelParams_t )EU433_LC8 );
-#elif defined( REGION_KR920 )
-	LoRaMacChannelAdd( 3, ( ChannelParams_t )KR920_LC4 );
-	LoRaMacChannelAdd( 4, ( ChannelParams_t )KR920_LC5 );
-	LoRaMacChannelAdd( 5, ( ChannelParams_t )KR920_LC6 );
-	LoRaMacChannelAdd( 6, ( ChannelParams_t )KR920_LC7 );
-	LoRaMacChannelAdd( 7, ( ChannelParams_t )KR920_LC8 );
-#elif defined( REGION_AS923 ) || defined( REGION_AS923_AS1 ) || defined( REGION_AS923_AS2 )
-	LoRaMacChannelAdd( 2, ( ChannelParams_t )AS923_LC3 );
-	LoRaMacChannelAdd( 3, ( ChannelParams_t )AS923_LC4 );
-	LoRaMacChannelAdd( 4, ( ChannelParams_t )AS923_LC5 );
-	LoRaMacChannelAdd( 5, ( ChannelParams_t )AS923_LC6 );
-	LoRaMacChannelAdd( 6, ( ChannelParams_t )AS923_LC7 );
-	LoRaMacChannelAdd( 7, ( ChannelParams_t )AS923_LC8 );
+#if defined(REGION_EU868)
+	LoRaMacChannelAdd(3, (ChannelParams_t)EU868_LC4);
+	LoRaMacChannelAdd(4, (ChannelParams_t)EU868_LC5);
+	LoRaMacChannelAdd(5, (ChannelParams_t)EU868_LC6);
+	LoRaMacChannelAdd(6, (ChannelParams_t)EU868_LC7);
+	LoRaMacChannelAdd(7, (ChannelParams_t)EU868_LC8);
+#elif defined(REGION_EU433)
+	LoRaMacChannelAdd(3, (ChannelParams_t)EU433_LC4);
+	LoRaMacChannelAdd(4, (ChannelParams_t)EU433_LC5);
+	LoRaMacChannelAdd(5, (ChannelParams_t)EU433_LC6);
+	LoRaMacChannelAdd(6, (ChannelParams_t)EU433_LC7);
+	LoRaMacChannelAdd(7, (ChannelParams_t)EU433_LC8);
+#elif defined(REGION_KR920)
+	LoRaMacChannelAdd(3, (ChannelParams_t)KR920_LC4);
+	LoRaMacChannelAdd(4, (ChannelParams_t)KR920_LC5);
+	LoRaMacChannelAdd(5, (ChannelParams_t)KR920_LC6);
+	LoRaMacChannelAdd(6, (ChannelParams_t)KR920_LC7);
+	LoRaMacChannelAdd(7, (ChannelParams_t)KR920_LC8);
+#elif defined(REGION_AS923) || defined(REGION_AS923_AS1) || defined(REGION_AS923_AS2)
+	LoRaMacChannelAdd(2, (ChannelParams_t)AS923_LC3);
+	LoRaMacChannelAdd(3, (ChannelParams_t)AS923_LC4);
+	LoRaMacChannelAdd(4, (ChannelParams_t)AS923_LC5);
+	LoRaMacChannelAdd(5, (ChannelParams_t)AS923_LC6);
+	LoRaMacChannelAdd(6, (ChannelParams_t)AS923_LC7);
+	LoRaMacChannelAdd(7, (ChannelParams_t)AS923_LC8);
 #endif
 
 	MibRequestConfirm_t mibReq;
@@ -510,32 +502,41 @@ void lwan_dev_params_update( void )
 	LoRaMacMibSetRequestConfirm(&mibReq);
 }
 
-void print_Hex(uint8_t *para,uint8_t size)
+void print_Hex(uint8_t *para, uint8_t size)
 {
-	for(int i=0;i<size;i++)
+	for (int i = 0; i < size; i++)
 	{
-		printf("%02X",*para++);
+		printf("%02X", *para++);
 	}
 }
 
 void printDevParam(void)
 {
-		printf("+OTAA=%d\r\n",overTheAirActivation);
-		printf("+Class=%X\r\n",loraWanClass+10);
-		printf("+ADR=%d\r\n",loraWanAdr);
-		printf("+IsTxConfirmed=%d\r\n",isTxConfirmed);
-		printf("+AppPort=%d\r\n",appPort);
-		printf("+DutyCycle=%u\r\n",appTxDutyCycle);
-		printf("+ConfirmedNbTrials=%u\r\n",confirmedNbTrials);
-		printf("+ChMask=%04X%04X%04X%04X%04X%04X\r\n",userChannelsMask[5],userChannelsMask[4],userChannelsMask[3],userChannelsMask[2],userChannelsMask[1],userChannelsMask[0]);
-		printf("+DevEui=");print_Hex(devEui,8);	printf("(For OTAA Mode)\r\n");
-		printf("+AppEui=");print_Hex(appEui,8);	printf("(For OTAA Mode)\r\n");
-		printf("+AppKey=");print_Hex(appKey,16);	printf("(For OTAA Mode)\r\n");
-		printf("+NwkSKey=");print_Hex(nwkSKey,16);	printf("(For ABP Mode)\r\n");
-		printf("+AppSKey=");print_Hex(appSKey,16);	printf("(For ABP Mode)\r\n");
-		printf("+DevAddr=%08X(For ABP Mode)\r\n\r\n",devAddr);
+	printf("+OTAA=%d\r\n", overTheAirActivation);
+	printf("+Class=%X\r\n", loraWanClass + 10);
+	printf("+ADR=%d\r\n", loraWanAdr);
+	printf("+IsTxConfirmed=%d\r\n", isTxConfirmed);
+	printf("+AppPort=%d\r\n", appPort);
+	printf("+DutyCycle=%u\r\n", appTxDutyCycle);
+	printf("+ConfirmedNbTrials=%u\r\n", confirmedNbTrials);
+	printf("+ChMask=%04X%04X%04X%04X%04X%04X\r\n", userChannelsMask[5], userChannelsMask[4], userChannelsMask[3], userChannelsMask[2], userChannelsMask[1], userChannelsMask[0]);
+	printf("+DevEui=");
+	print_Hex(devEui, 8);
+	printf("(For OTAA Mode)\r\n");
+	printf("+AppEui=");
+	print_Hex(appEui, 8);
+	printf("(For OTAA Mode)\r\n");
+	printf("+AppKey=");
+	print_Hex(appKey, 16);
+	printf("(For OTAA Mode)\r\n");
+	printf("+NwkSKey=");
+	print_Hex(nwkSKey, 16);
+	printf("(For ABP Mode)\r\n");
+	printf("+AppSKey=");
+	print_Hex(appSKey, 16);
+	printf("(For ABP Mode)\r\n");
+	printf("+DevAddr=%08X(For ABP Mode)\r\n\r\n", devAddr);
 }
-
 
 RTC_DATA_ATTR LoRaMacPrimitives_t LoRaMacPrimitive;
 RTC_DATA_ATTR LoRaMacCallback_t LoRaMacCallback;
@@ -545,23 +546,22 @@ void LoRaWanClass::generateDeveuiByChipID()
 	uint32_t uniqueId[2];
 #if defined(ESP_PLATFORM)
 	uint64_t id = getID();
-	uniqueId[0]=(uint32_t)(id>>32);
-	uniqueId[1]=(uint32_t)id;
+	uniqueId[0] = (uint32_t)(id >> 32);
+	uniqueId[1] = (uint32_t)id;
 #endif
-	for(int i=0;i<8;i++)
+	for (int i = 0; i < 8; i++)
 	{
-		if(i<4)
-			devEui[i] = (uniqueId[1]>>(8*(3-i)))&0xFF;
+		if (i < 4)
+			devEui[i] = (uniqueId[1] >> (8 * (3 - i))) & 0xFF;
 		else
-			devEui[i] = (uniqueId[0]>>(8*(7-i)))&0xFF;
+			devEui[i] = (uniqueId[0] >> (8 * (7 - i))) & 0xFF;
 	}
 }
 
-
-void LoRaWanClass::init(DeviceClass_t lorawanClass,LoRaMacRegion_t region)
+void LoRaWanClass::init(DeviceClass_t lorawanClass, LoRaMacRegion_t region)
 {
 
-	if(region == LORAMAC_REGION_AS923_AS1 || region == LORAMAC_REGION_AS923_AS2)
+	if (region == LORAMAC_REGION_AS923_AS1 || region == LORAMAC_REGION_AS923_AS2)
 		region = LORAMAC_REGION_AS923;
 	MibRequestConfirm_t mibReq;
 
@@ -571,90 +571,85 @@ void LoRaWanClass::init(DeviceClass_t lorawanClass,LoRaMacRegion_t region)
 	LoRaMacPrimitive.MacMlmeIndication = MlmeIndication;
 	LoRaMacCallback.GetBatteryLevel = BoardGetBatteryLevel;
 	LoRaMacCallback.GetTemperatureLevel = NULL;
-	LoRaMacInitialization( &LoRaMacPrimitive, &LoRaMacCallback,region);
-	TimerStop( &TxNextPacketTimer );
-	TimerInit( &TxNextPacketTimer, OnTxNextPacketTimerEvent );
-	
-
-
+	LoRaMacInitialization(&LoRaMacPrimitive, &LoRaMacCallback, region);
+	TimerStop(&TxNextPacketTimer);
+	TimerInit(&TxNextPacketTimer, OnTxNextPacketTimerEvent);
 
 	Serial.println();
-	
+
 	LORAWANLOG;
 	Serial.print("LoRaWAN ");
-	switch(region)
+	switch (region)
 	{
-		case LORAMAC_REGION_AS923_AS1:
-			Serial.print("AS923(AS1:922.0-923.4MHz)");
-			break;
-		case LORAMAC_REGION_AS923_AS2:
-			Serial.print("AS923(AS2:923.2-924.6MHz)");
-			break;
-		case LORAMAC_REGION_AU915:
-			Serial.print("AU915");
-			break;
-		case LORAMAC_REGION_CN470:
-			Serial.print("CN470");
-			break;
-		case LORAMAC_REGION_CN779:
-			Serial.print("CN779");
-			break;
-		case LORAMAC_REGION_EU433:
-			Serial.print("EU433");
-			break;
-		case LORAMAC_REGION_EU868:
-			Serial.print("EU868");
-			break;
-		case LORAMAC_REGION_KR920:
-			Serial.print("KR920");
-			break;
-		case LORAMAC_REGION_IN865:
-			Serial.print("IN865");
-			break;
-		case LORAMAC_REGION_US915:
-			Serial.print("US915");
-			break;
-		case LORAMAC_REGION_US915_HYBRID:
-			Serial.print("US915_HYBRID ");
-			break;
-		default:
-			break;
+	case LORAMAC_REGION_AS923_AS1:
+		Serial.print("AS923(AS1:922.0-923.4MHz)");
+		break;
+	case LORAMAC_REGION_AS923_AS2:
+		Serial.print("AS923(AS2:923.2-924.6MHz)");
+		break;
+	case LORAMAC_REGION_AU915:
+		Serial.print("AU915");
+		break;
+	case LORAMAC_REGION_CN470:
+		Serial.print("CN470");
+		break;
+	case LORAMAC_REGION_CN779:
+		Serial.print("CN779");
+		break;
+	case LORAMAC_REGION_EU433:
+		Serial.print("EU433");
+		break;
+	case LORAMAC_REGION_EU868:
+		Serial.print("EU868");
+		break;
+	case LORAMAC_REGION_KR920:
+		Serial.print("KR920");
+		break;
+	case LORAMAC_REGION_IN865:
+		Serial.print("IN865");
+		break;
+	case LORAMAC_REGION_US915:
+		Serial.print("US915");
+		break;
+	case LORAMAC_REGION_US915_HYBRID:
+		Serial.print("US915_HYBRID ");
+		break;
+	default:
+		break;
 	}
-	Serial.printf(" Class %X start!\r\n\r\n",loraWanClass+10);
+	Serial.printf(" Class %X start!\r\n\r\n", loraWanClass + 10);
 	printDevParam();
 	Serial.println();
-    mibReq.Type = MIB_ADR;
-    mibReq.Param.AdrEnable = loraWanAdr;
-    LoRaMacMibSetRequestConfirm( &mibReq );
+	mibReq.Type = MIB_ADR;
+	mibReq.Param.AdrEnable = loraWanAdr;
+	LoRaMacMibSetRequestConfirm(&mibReq);
 
-    mibReq.Type = MIB_PUBLIC_NETWORK;
-    mibReq.Param.EnablePublicNetwork = LORAWAN_PUBLIC_NETWORK;
-    LoRaMacMibSetRequestConfirm( &mibReq );
+	mibReq.Type = MIB_PUBLIC_NETWORK;
+	mibReq.Param.EnablePublicNetwork = LORAWAN_PUBLIC_NETWORK;
+	LoRaMacMibSetRequestConfirm(&mibReq);
 
-    lwan_dev_params_update();
+	lwan_dev_params_update();
 
-    mibReq.Type = MIB_DEVICE_CLASS;
-    LoRaMacMibGetRequestConfirm( &mibReq );
+	mibReq.Type = MIB_DEVICE_CLASS;
+	LoRaMacMibGetRequestConfirm(&mibReq);
 
-    if(loraWanClass != mibReq.Param.Class)
-    {
-    mibReq.Param.Class = loraWanClass;
-    LoRaMacMibSetRequestConfirm( &mibReq );
-    }
+	if (loraWanClass != mibReq.Param.Class)
+	{
+		mibReq.Param.Class = loraWanClass;
+		LoRaMacMibSetRequestConfirm(&mibReq);
+	}
 
-    deviceState = DEVICE_STATE_JOIN;
-
+	deviceState = DEVICE_STATE_JOIN;
 }
-
 
 void LoRaWanClass::join()
 {
-	if( overTheAirActivation )
+	if (overTheAirActivation)
 	{
 		LORAWANLOG;
 		Serial.println("joining...");
 		MlmeReq_t mlmeReq;
-		
+
 		mlmeReq.Type = MLME_JOIN;
 
 		mlmeReq.Req.Join.DevEui = devEui;
@@ -662,7 +657,7 @@ void LoRaWanClass::join()
 		mlmeReq.Req.Join.AppKey = appKey;
 		mlmeReq.Req.Join.NbTrials = 1;
 
-		if( LoRaMacMlmeRequest( &mlmeReq ) == LORAMAC_STATUS_OK )
+		if (LoRaMacMlmeRequest(&mlmeReq) == LORAMAC_STATUS_OK)
 		{
 			deviceState = DEVICE_STATE_SLEEP;
 		}
@@ -677,130 +672,134 @@ void LoRaWanClass::join()
 
 		mibReq.Type = MIB_NET_ID;
 		mibReq.Param.NetID = LORAWAN_NETWORK_ID;
-		LoRaMacMibSetRequestConfirm( &mibReq );
+		LoRaMacMibSetRequestConfirm(&mibReq);
 
 		mibReq.Type = MIB_DEV_ADDR;
 		mibReq.Param.DevAddr = devAddr;
-		LoRaMacMibSetRequestConfirm( &mibReq );
+		LoRaMacMibSetRequestConfirm(&mibReq);
 
 		mibReq.Type = MIB_NWK_SKEY;
 		mibReq.Param.NwkSKey = nwkSKey;
-		LoRaMacMibSetRequestConfirm( &mibReq );
+		LoRaMacMibSetRequestConfirm(&mibReq);
 
 		mibReq.Type = MIB_APP_SKEY;
 		mibReq.Param.AppSKey = appSKey;
-		LoRaMacMibSetRequestConfirm( &mibReq );
+		LoRaMacMibSetRequestConfirm(&mibReq);
 
 		mibReq.Type = MIB_NETWORK_JOINED;
 		mibReq.Param.IsNetworkJoined = true;
-		LoRaMacMibSetRequestConfirm( &mibReq );
-		
+		LoRaMacMibSetRequestConfirm(&mibReq);
+
 		deviceState = DEVICE_STATE_SEND;
 	}
 }
 
 void LoRaWanClass::send()
 {
-	if( nextTx == true )
+	printf("nextTx = %d\n", nextTx);
+
+	if (nextTx == true)
 	{
 		MibRequestConfirm_t mibReq;
 		mibReq.Type = MIB_DEVICE_CLASS;
-		LoRaMacMibGetRequestConfirm( &mibReq );
+		LoRaMacMibGetRequestConfirm(&mibReq);
 
-		if(loraWanClass != mibReq.Param.Class)
+		if (loraWanClass != mibReq.Param.Class)
 		{
 			mibReq.Param.Class = loraWanClass;
-			LoRaMacMibSetRequestConfirm( &mibReq );
+			LoRaMacMibSetRequestConfirm(&mibReq);
 		}
-		nextTx = SendFrame( );
+		nextTx = SendFrame();
 	}
 }
 
 void LoRaWanClass::cycle(uint32_t dutyCycle)
 {
-	TimerSetValue( &TxNextPacketTimer, dutyCycle );
-	TimerStart( &TxNextPacketTimer );
+	TimerSetValue(&TxNextPacketTimer, dutyCycle);
+	TimerStart(&TxNextPacketTimer);
 }
 
 void LoRaWanClass::sleep(DeviceClass_t classMode)
 {
 	Mcu.timerhandler();
 	Radio.IrqProcess();
-	Mcu.sleep(classMode,debugLevel,HELTEC_BOARD,SLOW_CLK_TPYE);
+	Mcu.sleep(classMode, debugLevel, HELTEC_BOARD, SLOW_CLK_TPYE);
 }
 void LoRaWanClass::setDefaultDR(int8_t dataRate)
 {
 	defaultDrForNoAdr = dataRate;
 }
 
-
 #ifndef ESP_PLATFORM
 void LoRaWanClass::ifskipjoin()
 {
-//if saved net info is OK in lorawan mode, skip join.
-	if(checkNetInfo()&&modeLoraWan){
+	// if saved net info is OK in lorawan mode, skip join.
+	if (checkNetInfo() && modeLoraWan)
+	{
 		Serial.println();
-		if(passthroughMode==false)
+		if (passthroughMode == false)
 		{
 			Serial.println("Wait 3s for user key to rejoin network");
-			uint16_t i=0;
-			pinMode(USER_KEY,INPUT);
-			while(i<=3000)
+			uint16_t i = 0;
+			pinMode(USER_KEY, INPUT);
+			while (i <= 3000)
 			{
-				if(digitalRead(USER_KEY)==LOW)//if user key down, rejoin network;
+				if (digitalRead(USER_KEY) == LOW) // if user key down, rejoin network;
 				{
 					netInfoDisable();
-					pinMode(USER_KEY,OUTPUT);
-					digitalWrite(USER_KEY,HIGH);
+					pinMode(USER_KEY, OUTPUT);
+					digitalWrite(USER_KEY, HIGH);
 					return;
 				}
 				delay(1);
 				i++;
 			}
-			pinMode(USER_KEY,OUTPUT);
-			digitalWrite(USER_KEY,HIGH);
+			pinMode(USER_KEY, OUTPUT);
+			digitalWrite(USER_KEY, HIGH);
 		}
-#if(AT_SUPPORT)
+#if (AT_SUPPORT)
 		getDevParam();
 #endif
 
-		init(loraWanClass,loraWanRegion);
+		init(loraWanClass, loraWanRegion);
 		getNetInfo();
-		if(passthroughMode==false){
+		if (passthroughMode == false)
+		{
 			Serial.println("User key not detected,Use reserved Net");
 		}
-		else{
+		else
+		{
 			Serial.println("Use reserved Net");
 		}
-		if(passthroughMode==false)
+		if (passthroughMode == false)
 		{
-			int32_t temp=randr(0,appTxDutyCycle);
+			int32_t temp = randr(0, appTxDutyCycle);
 			Serial.println();
-			Serial.printf("Next packet send %d ms later(random time from 0 to APP_TX_DUTYCYCLE)\r\n",temp);
+			Serial.printf("Next packet send %d ms later(random time from 0 to APP_TX_DUTYCYCLE)\r\n", temp);
 			Serial.println();
-			cycle(temp);//send packet in a random time to avoid network congestion.
+			cycle(temp); // send packet in a random time to avoid network congestion.
 		}
 		deviceState = DEVICE_STATE_SLEEP;
 	}
 }
 #endif
 
-#if defined(WIFI_LORA_32_V3)||defined( WIFI_LORA_32_V2 )||defined(WIRELESS_STICK_V3)||defined( WIFI_LORA_32 )||defined(WIRELESS_STICK)
+#if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIRELESS_STICK_V3) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK)
 void LoRaWanClass::displayJoining()
 {
 	display.setFont(ArialMT_Plain_16);
 	display.setTextAlignment(TEXT_ALIGN_CENTER);
 	display.clear();
-	display.drawString(display.getWidth()/2, display.getHeight()/2,"JOINING...");
+	display.drawString(display.getWidth() / 2, display.getHeight() / 2, "JOINING...");
 	display.display();
-#if (SLOW_CLK_TPYE==1)
+#if (SLOW_CLK_TPYE == 1)
 	delay(1000);
 #endif
 }
 void LoRaWanClass::displayJoined()
 {
-#if (SLOW_CLK_TPYE==1)
-	digitalWrite(Vext,LOW);
+#if (SLOW_CLK_TPYE == 1)
+	digitalWrite(Vext, LOW);
 	display.init();
 	display.setFont(ArialMT_Plain_16);
 	display.setTextAlignment(TEXT_ALIGN_CENTER);
@@ -812,144 +811,145 @@ void LoRaWanClass::displayJoined()
 }
 void LoRaWanClass::displaySending()
 {
-    isDispayOn = 1;
-	digitalWrite(Vext,LOW);
+	isDispayOn = 1;
+	digitalWrite(Vext, LOW);
 	display.init();
 	display.setFont(ArialMT_Plain_16);
 	display.setTextAlignment(TEXT_ALIGN_CENTER);
 	display.clear();
-	display.drawString(display.getWidth()/2, display.getHeight()/2, "SENDING...");
+	display.drawString(display.getWidth() / 2, display.getHeight() / 2, "SENDING...");
 	display.display();
 	delay(1000);
 }
 void LoRaWanClass::displayAck()
 {
-    if(ifDisplayAck==0)
-    {
-    	return;
-    }
-    ifDisplayAck--;
-#if (SLOW_CLK_TPYE==1)
-		digitalWrite(Vext,LOW);
-		display.init();
-		display.setFont(ArialMT_Plain_16);
-		display.setTextAlignment(TEXT_ALIGN_CENTER);
+	if (ifDisplayAck == 0)
+	{
+		return;
+	}
+	ifDisplayAck--;
+#if (SLOW_CLK_TPYE == 1)
+	digitalWrite(Vext, LOW);
+	display.init();
+	display.setFont(ArialMT_Plain_16);
+	display.setTextAlignment(TEXT_ALIGN_CENTER);
 #endif
 
 	display.clear();
 	display.drawString(64, 22, "ACK RECEIVED");
 	char temp[30];
-	sprintf(temp,"rssi: %d, snr %d",revrssi,revsnr);
+	sprintf(temp, "rssi: %d, snr %d", revrssi, revsnr);
 	display.setFont(ArialMT_Plain_10);
 	display.setTextAlignment(TEXT_ALIGN_RIGHT);
 	display.drawString(128, 0, temp);
-	if(loraWanClass==CLASS_A)
+	if (loraWanClass == CLASS_A)
 	{
 		display.setFont(ArialMT_Plain_10);
 		display.setTextAlignment(TEXT_ALIGN_LEFT);
 		display.drawString(28, 50, "Into deep sleep in 2S");
 	}
 	display.display();
-	if(loraWanClass==CLASS_A)
+	if (loraWanClass == CLASS_A)
 	{
 		delay(2000);
 		isDispayOn = 0;
-		digitalWrite(Vext,HIGH);
+		digitalWrite(Vext, HIGH);
 		display.stop();
 	}
 }
 void LoRaWanClass::displayMcuInit()
 {
 	isDispayOn = 1;
-	digitalWrite(Vext,LOW);
+	digitalWrite(Vext, LOW);
 	display.init();
 	display.setFont(ArialMT_Plain_16);
 	display.setTextAlignment(TEXT_ALIGN_CENTER);
 	display.clear();
-	display.drawString(display.getWidth()/2, display.getHeight()/2-10, "LORAWAN");
-	display.drawString(display.getWidth()/2, display.getHeight()/2+5, "STARTING");
+	display.drawString(display.getWidth() / 2, display.getHeight() / 2 - 10, "LORAWAN");
+	display.drawString(display.getWidth() / 2, display.getHeight() / 2 + 5, "STARTING");
 	display.display();
 	delay(2000);
 }
 #endif
 
-
 void lora_printf(const char *format, ...)
 {
-    char loc_buf[64];
-    char * temp = loc_buf;
-    va_list arg;
-    va_list copy;
-    va_start(arg, format);
-    va_copy(copy, arg);
-    size_t len = vsnprintf(NULL, 0, format, arg);
-    va_end(copy);
-    if(len >= sizeof(loc_buf)){
-        temp = new char[len+1];
-        if(temp == NULL) {
-            return ;
-        }
-    }
-    len = vsnprintf(temp, len+1, format, arg);
-    Serial.write((uint8_t*)temp, len);
-    va_end(arg);
-    if(len > 64){
-        delete[] temp;
-    }
+	char loc_buf[64];
+	char *temp = loc_buf;
+	va_list arg;
+	va_list copy;
+	va_start(arg, format);
+	va_copy(copy, arg);
+	size_t len = vsnprintf(NULL, 0, format, arg);
+	va_end(copy);
+	if (len >= sizeof(loc_buf))
+	{
+		temp = new char[len + 1];
+		if (temp == NULL)
+		{
+			return;
+		}
+	}
+	len = vsnprintf(temp, len + 1, format, arg);
+	Serial.write((uint8_t *)temp, len);
+	va_end(arg);
+	if (len > 64)
+	{
+		delete[] temp;
+	}
 }
 extern uint32_t storedlicense[4];
 
 void check_input_license()
 {
 	int i;
-	i=0;
+	i = 0;
 	char rxData[50];
 	uint8_t inputlicense[32];
 	uint32_t timestart;
 	timestart = millis();
 	Serial.flush();
-	  while((millis()-timestart)<1000)
-	  {
-		if(Serial.available()>0)
+	while ((millis() - timestart) < 1000)
+	{
+		if (Serial.available() > 0)
 		{
-		  rxData[i++]=(uint8_t)Serial.read();
+			rxData[i++] = (uint8_t)Serial.read();
 		}
-		if(i==41)
+		if (i == 41)
 		{
-		  break;
+			break;
 		}
-	  }
-	  rxData[i]=0;
-	  if(i!=41||rxData[8]!='=')
-	  {
+	}
+	rxData[i] = 0;
+	if (i != 41 || rxData[8] != '=')
+	{
 		return;
-	  }
-	  for(int j=0;j<32;j++)
-	  {
-		inputlicense[j]=rxData[j+9];
-		if(inputlicense[j]>='a')
+	}
+	for (int j = 0; j < 32; j++)
+	{
+		inputlicense[j] = rxData[j + 9];
+		if (inputlicense[j] >= 'a')
 		{
-		  inputlicense[j]-=32;
+			inputlicense[j] -= 32;
 		}
-		if(inputlicense[j]<='9')
+		if (inputlicense[j] <= '9')
 		{
-		  inputlicense[j]-='0';
+			inputlicense[j] -= '0';
 		}
 		else
 		{
-		  inputlicense[j]-=('A'-10);
+			inputlicense[j] -= ('A' - 10);
 		}
-	  }
-	
-	  for(int j=0;j<4;j++)
-	  {
-		storedlicense[j]=0;
-		for(int k=0;k<8;k++)
-		{
-		 storedlicense[j]|=(uint32_t)inputlicense[8*j+k]<<(28-k*4);
-		}
-	  }
+	}
 
+	for (int j = 0; j < 4; j++)
+	{
+		storedlicense[j] = 0;
+		for (int k = 0; k < 8; k++)
+		{
+			storedlicense[j] |= (uint32_t)inputlicense[8 * j + k] << (28 - k * 4);
+		}
+	}
 }
 
 LoRaWanClass LoRaWAN;
