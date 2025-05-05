@@ -56,8 +56,8 @@ void handleLoraWanStateMachine() {
     {
       Serial.println("DEVICE_STATE_SEND");
       // prepareTxFrame( appPort );
-      mygps.prepare_coords_msg(appData, appDataSize);
-      LoRaWAN.send();
+      // mygps.prepare_coords_msg(appData, appDataSize);
+      // LoRaWAN.send();
       //Serial.println("sent first");
       // mywifiloc.prepare_wifi_msg(appData, appDataSize);
       // LoRaWAN.send();
