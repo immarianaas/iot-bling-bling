@@ -5,8 +5,8 @@
 #define SDA_PIN 6
 #define SCL_PIN 7
 
-#define BUZZER 18
-#define POWERCONTROL 9
+#define BUZZER 9 //18
+#define POWERCONTROL 18 // 9
 
 // to change later:
 const float lowBatteryThreshold = 30.0;
@@ -51,8 +51,9 @@ void My_Battery::checkBattery10Sec()
     
     if (now - lastBatteryCheck >= batteryCheckInterval)
     {
-        turnOn();
         lastBatteryCheck = now;
+
+        turnOn();
         checkBattery();
         shutDown();
 
@@ -104,5 +105,10 @@ void My_Battery::shutDown()
 
 void My_Battery::turnOn() {
     digitalWrite(POWERCONTROL, LOW); 
+    delay(100); 
+    Wire.begin(SDA_PIN, SCL_PIN); 
+    delay(10); 
+    maxlipo.begin(); 
     powerIsOn = true;
-  }
+}
+

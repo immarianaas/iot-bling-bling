@@ -6,7 +6,7 @@ void setup() {
   Serial.begin(115200);
   delay(3000);
 
-  mygps.init();
+  // mygps.init();
 }
 
 void loop() {

@@ -3,8 +3,7 @@
 #define SDA_PIN 6
 #define SCL_PIN 7
 
-// const int ledPin = 5; // led output
-
+#define LED 8
 #define PHOTO 4
 #define BUTTON 5
 #define ACCEL_INTR 19 // dunno yet
@@ -28,9 +27,11 @@ My_LightControl::My_LightControl() : ADXL345(&Wire, 0x53)
 
 void My_LightControl::init()
 {
-    // pinMode(ledPin, OUTPUT);
+    pinMode(LED, OUTPUT);
     pinMode(BUTTON, INPUT_PULLUP);
     pinMode(ACCEL_INTR, INPUT_PULLUP);
+
+    digitalWrite(LED, LOW);
 
     Wire.setPins(SDA_PIN, SCL_PIN);
 
@@ -80,7 +81,7 @@ void My_LightControl::button()
     if (buttonPressed && currentTime - lastManualToggle > debounceTime)
     {
         manual = !manual;
-        digitalWrite(ledPin, manual ? HIGH : LOW);
+        digitalWrite(LED, manual ? HIGH : LOW);
         lastManualToggle = currentTime;
         buttonPressed = false;
         Serial.print("Manual mode: ");
@@ -93,12 +94,13 @@ bool My_LightControl::accel_activity()
 {   
     byte interrupts = ADXL345.getInterruptSource();
 
-    if (!manual)
+ 
+    if (accelDetected)
     {
-        if (accelDetected)
-        {
-            accelDetected = false;
+        accelDetected = false;
 
+        if (!manual)
+        {
             if (ADXL345.triggered(interrupts, ADXL345_ACTIVITY))
             {
                 return true;
@@ -108,6 +110,14 @@ bool My_LightControl::accel_activity()
                 return false;
             }
         }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -116,12 +126,13 @@ bool My_LightControl::accel_inactivity()
 {   
     byte interrupts = ADXL345.getInterruptSource();
 
-    if (!manual)
+ 
+    if (accelDetected)
     {
-        if (accelDetected)
-        {
-            accelDetected = false;
+        accelDetected = false;
 
+        if (!manual)
+        {
             if (ADXL345.triggered(interrupts, ADXL345_INACTIVITY))
             {
                 return true;
@@ -131,6 +142,14 @@ bool My_LightControl::accel_inactivity()
                 return false;
             }
         }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -156,21 +175,24 @@ void My_LightControl::light_ctrl_active()
 {
     unsigned long currentTime = millis();
 
-    button():
+    button();
 
-    if (accel_activity() and dark())
+    if (accel_activity())
     {
-        digitalWrite(ledPin, HIGH);
-        lastMoveTime = currentTime;
-        Serial.println("Motion and dark: LED ON");
+        if (dark())
+        {
+            digitalWrite(LED, HIGH);
+            lastMoveTime = currentTime;
+            // Serial.println("Motion and dark: LED ON");
+        }
     }
 
-    if (!manual)
+    if (accel_inactivity())
     {
         if (currentTime - lastMoveTime > stillDelay)
         {
-            digitalWrite(ledPin, LOW);
-            Serial.println("Still too long: LED OFF");
+            digitalWrite(LED, LOW);
+            // Serial.println("Still too long: LED OFF");
         }
     }
 }

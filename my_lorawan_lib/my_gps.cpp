@@ -2,13 +2,18 @@
 // #include <HardwareSerial.h>
 // #include <TinyGPS++.h>
 
-#define GPS_RX 6 // UART RX
-#define GPS_TX 7 // UART TX
+// #define GPS_RX 6 // UART RX
+// #define GPS_TX 7 // UART TX
+
+
+#define GPS_RX 0 // 2
+#define GPS_TX 3
 
 My_GPS::My_GPS() : gps(), GPSerial(1) {
     GPSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
     GPSerial.setTimeout(3000);
 }
+
 
 bool My_GPS::get_coords(float &lat, float &lng)
 {
