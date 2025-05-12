@@ -12,6 +12,10 @@ public:
 private:
     void static IRAM_ATTR accelISR();
     void static IRAM_ATTR buttonISR();
+    void button();
+    bool accel_activity();
+    bool accel_inactivity();
+    bool dark();
     DFRobot_ADXL345_I2C ADXL345;
 };
 
