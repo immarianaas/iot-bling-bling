@@ -1,3 +1,5 @@
+#include "heltec.h"
+
 #include <my_light_control.h>
 
 My_LightControl mylight;

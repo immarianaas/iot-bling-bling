@@ -5,6 +5,7 @@
 
 // const int ledPin = 5; // led output
 
+#define LIGHT 8 // three kinda works
 #define PHOTO 4
 #define BUTTON 5
 #define ACCEL_INTR 19 // dunno yet
@@ -19,7 +20,7 @@ int lightValue = 0;
 unsigned long lastMoveTime = 0; // timer for light turn off after x time
 unsigned long lastManualToggle = 0;
 
-const int stillDelay = 3000; // delay before light goes off in milliseconds
+const int stillDelay = 10000; // delay before light goes off in milliseconds
 const int debounceTime = 200;
 
 My_LightControl::My_LightControl() : ADXL345(&Wire, 0x53)
@@ -28,7 +29,7 @@ My_LightControl::My_LightControl() : ADXL345(&Wire, 0x53)
 
 void My_LightControl::init()
 {
-    // pinMode(ledPin, OUTPUT);
+    pinMode(LIGHT, OUTPUT);
     pinMode(BUTTON, INPUT_PULLUP);
     pinMode(ACCEL_INTR, INPUT_PULLUP);
 
@@ -86,14 +87,17 @@ void My_LightControl::light_ctrl_active()
     if (buttonPressed && currentTime - lastManualToggle > debounceTime)
     {
         manual = !manual;
-        // digitalWrite(ledPin, manual ? HIGH : LOW);
+        digitalWrite(LIGHT, manual ? HIGH : LOW);
+        Serial.print("turning light to: ");
+        Serial.println(manual ? HIGH : LOW);
+
         lastManualToggle = currentTime;
         buttonPressed = false;
         Serial.print("Manual mode: ");
         Serial.println(manual);
     }
 
-    if (!manual)
+    else if (!manual)
     {
         if (motionDetected)
         {
@@ -103,16 +107,16 @@ void My_LightControl::light_ctrl_active()
                 Serial.println("Motion");
                 if (lightValue < 2600)
                 {
-                    // digitalWrite(ledPin, HIGH);
+                    digitalWrite(LIGHT, HIGH);
                     lastMoveTime = currentTime;
                     Serial.println("Motion and dark: LED ON");
                 }
             }
         }
-        if (currentTime - lastMoveTime > stillDelay)
+        else if (currentTime - lastMoveTime > stillDelay)
         {
-            // digitalWrite(ledPin, LOW);
-            // Serial.println("Still too long: LED OFF");
+            digitalWrite(LIGHT, LOW);
+            Serial.println("Still too long: LED OFF");
         }
     }
 }
