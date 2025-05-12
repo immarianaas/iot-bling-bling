@@ -14,6 +14,7 @@ public:
 private:
     void triggerAlarm();
     void shutDown();
+    void turnOn();
     Adafruit_MAX17048 maxlipo;
     unsigned long lastBatteryCheck = 0;
     const unsigned long batteryCheckInterval = 10000;  // 10 seconds

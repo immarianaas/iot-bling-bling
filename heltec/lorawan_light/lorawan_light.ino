@@ -2,6 +2,8 @@
 #include <my_lorawan.h>
 #include <my_gps.h>
 #include <my_wifi_location.h>
+
+#include <my_light_control.h>
 //// use this devEUI: 0004A30B010651F7
 
 My_GPS mygps;
@@ -28,6 +30,7 @@ void setup() {
   Serial.println("hello?");
   Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE);
   mywifiloc.init();
+  mylight.init();
 
 }
 
@@ -112,5 +115,7 @@ void loop()
     needsToReply = false;
     deviceState = DEVICE_STATE_SEND;
   }
+
+  mylight.light_ctrl_active();
 
 }
