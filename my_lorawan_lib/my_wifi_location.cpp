@@ -4,7 +4,6 @@
 
 My_Wifi_Location::My_Wifi_Location()
 {
-
 }
 
 void My_Wifi_Location::init()
@@ -49,6 +48,15 @@ void My_Wifi_Location::print_network_info_hex(uint8_t *arr)
     if (arr[7] < 0x10)
         Serial.print("0");
     Serial.println(arr[7], HEX);
+}
+
+bool My_Wifi_Location::shouldUpdate(bool activeMode)
+{
+    return (millis() - last_send > WIFI_SEND_INTERVAL) && activeMode;
+}
+void My_Wifi_Location::updateLastSendTime()
+{
+    last_send = millis();
 }
 
 void My_Wifi_Location::prepare_wifi_msg(uint8_t *msg_buffer, uint8_t &msg_size)

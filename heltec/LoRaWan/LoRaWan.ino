@@ -41,6 +41,7 @@ void handleLoraWanStateMachine() {
       //Serial.println(loraWanRegion);
       LoRaWAN.init(loraWanClass,loraWanRegion);
       //both set join DR and DR when ADR off 
+      Serial.println("just before setDefaultDR(3)");
       LoRaWAN.setDefaultDR(3);
       Serial.println("HM");
 

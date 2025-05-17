@@ -5,15 +5,23 @@
 // #define GPS_RX 6 // UART RX
 // #define GPS_TX 7 // UART TX
 
+// tx was (wrongly) connected to 3
+// rx was/is connected to 15 (which is 0)
 
 #define GPS_RX 0 // 2
 #define GPS_TX 3
 
-My_GPS::My_GPS() : gps(), GPSerial(1) {
+
+// 3 is connected to RX on the GPS sensor!!!
+// 0 is connected to TX on the GPS sensor!!
+// #define GPS_RX 2
+// #define GPS_TX 0
+
+My_GPS::My_GPS() : gps(), GPSerial(1)
+{
     GPSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
     GPSerial.setTimeout(3000);
 }
-
 
 bool My_GPS::get_coords(float &lat, float &lng)
 {
@@ -22,6 +30,8 @@ bool My_GPS::get_coords(float &lat, float &lng)
     while (GPSerial.available() > 0 and timeout - millis() > 0)
     {
         int c = GPSerial.read();
+        Serial.print(c);
+        Serial.println("here");
         gps.encode(c);
         if (gps.location.isValid())
         {
@@ -95,4 +105,19 @@ void My_GPS::prepare_coords_msg(uint8_t *msg_buffer, uint8_t &msg_size)
     float lat, lng;
     bool ok = get_coords(lat, lng);
     prepare_message(ok, lat, lng, msg_buffer, msg_size);
+}
+
+bool My_GPS::shouldUpdate(bool activeMode)
+{
+    if (!activeMode)
+    {
+        was_already_active = false;
+        return false;
+    }
+    // if activeMode is true:
+    // true:  if it wasnt active before
+    // false: if it was active before
+    bool ret = !was_already_active;
+    was_already_active = true;
+    return ret;
 }

@@ -65,7 +65,7 @@ bool overTheAirActivation = true;
 bool loraWanAdr = false;
 
 /* Indicates if the node is sending confirmed or unconfirmed messages */
-bool isTxConfirmed = true;
+bool isTxConfirmed = true; // originally true
 
 /* Application port */
 uint8_t appPort = 1;

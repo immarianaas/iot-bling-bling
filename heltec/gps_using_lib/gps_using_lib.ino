@@ -16,6 +16,8 @@ void loop() {
   Serial.print("ok? ");
   Serial.println(ok);
 
+  if (ok == 0) return;
+
   Serial.print("latitude: ");
   Serial.println(lat, 6);
   Serial.print("longitude: ");
@@ -38,6 +40,6 @@ void loop() {
   Serial.print("converted longitude: ");
   Serial.println(conv_lng, 6);
 
-  delay(10000);
+  delay(1000);
 
 }
