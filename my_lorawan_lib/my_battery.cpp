@@ -6,44 +6,28 @@
 #define SCL_PIN 7
 
 #define BUZZER 18
-#define POWERCONTROL 9
 
-// to change later:
-const float lowBatteryThreshold = 30.0;
-
-unsigned long lastBatteryCheck = 0;
-const unsigned long batteryCheckInterval = 10000; // 10 seconds
-
-unsigned long powerShutdownTime = 0;
-const unsigned long shutdownDelay = 30000; // 30 seconds
-
-bool powerIsOn = true;
-bool battery_last_send = 0;
-
-My_Battery::My_Battery() : maxlipo()
-{
-}
+// My_Battery::My_Battery() : maxlipo()
+// {
+// }
 
 void My_Battery::init()
 {
     pinMode(BUZZER, OUTPUT);
-    pinMode(POWERCONTROL, OUTPUT);
-    digitalWrite(POWERCONTROL, HIGH);
 
     // Wire.begin(SDA_PIN, SCL_PIN);
     Wire.setPins(SDA_PIN, SCL_PIN);
     //Wire.begin();
     delay(300);
+    // maxlipo.begin(&Wire);
     // while (!maxlipo.begin())
     // {
     //     Serial.println("MAX17048 not found!");
     //     // triggerAlarm();
-    //     //shutDown();
     // }
 
     Serial.println("Smart Bike Light Initialized");
     lastBatteryCheck = millis();
-    // powerShutdownTime = millis() + shutdownDelay;  // Set time to turn off power
 }
 
 void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
@@ -63,13 +47,11 @@ void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
 
 void My_Battery::updateBatteryStatus()
 {
-    turnOn();
     float obtainedPercent = maxlipo.cellPercent();
     if (isnan(obtainedPercent))
         batteryPercent = -1;
     else
         batteryPercent = (int)obtainedPercent;
-    shutDown();
 }
 
 bool My_Battery::shouldUpdate()
@@ -88,10 +70,7 @@ void My_Battery::checkBattery10Sec()
     if (now - lastBatteryCheck >= batteryCheckInterval)
     {
         lastBatteryCheck = now;
-
-        turnOn();
         checkBattery();
-        shutDown();
     }
 }
 
@@ -114,10 +93,9 @@ void My_Battery::checkBattery()
     Serial.println(" %");
 
     if (percent < lowBatteryThreshold)
-    {
-        Serial.println("LOW BATTERY! Triggering alarm and shutdown...");
+    {   
         triggerAlarm();
-        shutDown();
+        Serial.println("LOW BATTERY! Triggering alarm and shutdown...");
     }
 }
 
@@ -138,18 +116,3 @@ void My_Battery::triggerAlarm()
     }
 }
 
-void My_Battery::shutDown()
-{
-    digitalWrite(POWERCONTROL, HIGH);
-    powerIsOn = false;
-}
-
-void My_Battery::turnOn()
-{
-    digitalWrite(POWERCONTROL, LOW);
-    delay(100);
-    Wire.begin(SDA_PIN, SCL_PIN);
-    delay(10);
-    maxlipo.begin();
-    powerIsOn = true;
-}

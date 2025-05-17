@@ -7,51 +7,37 @@
 Adafruit_MAX17048 maxlipo;
 
 const int buzzerPin = 25;
-const int powerControlPin = 26;  // Controls JC2N3906 to power a module
 const float lowBatteryThreshold = 30.0;
+const unsigned long batteryCheckInterval = 5000; // 5 seconds
 
 unsigned long lastBatteryCheck = 0;
-const unsigned long batteryCheckInterval = 10000;  // 10 seconds
-
-unsigned long powerShutdownTime = 0;
-const unsigned long shutdownDelay = 30000;         // 30 seconds
-
-bool powerIsOn = true;
 
 void setup() {
   Serial.begin(115200);
-
   pinMode(buzzerPin, OUTPUT);
-  pinMode(powerControlPin, OUTPUT);
-  digitalWrite(powerControlPin, LOW);  
+
+  // Power to MAX17048 should be connected directly to 3.3V for this test
+  Serial.println("Initializing I2C and MAX17048...");
 
   Wire.begin(SDA_PIN, SCL_PIN);
+  delay(100);
 
   if (!maxlipo.begin()) {
-    Serial.println(F("MAX17048 not found!"));
+    Serial.println("ERROR: MAX17048 not detected. Check wiring and power.");
     triggerAlarm();
-    shutDown();
+    while (1); // Stop here if initialization fails
   }
 
-  Serial.println("Smart Bike Light Initialized");
-
+  Serial.println("MAX17048 detected. Beginning battery read loop.");
   lastBatteryCheck = millis();
-  powerShutdownTime = millis() + shutdownDelay;  // Set time to turn off power
 }
 
 void loop() {
   unsigned long now = millis();
 
-  // Check battery every 10 seconds
   if (now - lastBatteryCheck >= batteryCheckInterval) {
     lastBatteryCheck = now;
     checkBattery();
-  }
-
-  // Shut down after 30 seconds (non-blocking)
-  if (powerIsOn && now >= powerShutdownTime) {
-    Serial.println("Auto-shutdown after 30 seconds.");
-    shutDown();
   }
 }
 
@@ -68,9 +54,8 @@ void checkBattery() {
   Serial.print("Battery: "); Serial.print(percent); Serial.println(" %");
 
   if (percent < lowBatteryThreshold) {
-    Serial.println("LOW BATTERY! Triggering alarm and shutdown...");
+    Serial.println("LOW BATTERY! Triggering alarm.");
     triggerAlarm();
-    shutDown();
   }
 }
 
@@ -81,9 +66,4 @@ void triggerAlarm() {
     noTone(buzzerPin);
     delay(200);
   }
-}
-
-void shutDown() {
-  digitalWrite(powerControlPin, HIGH); 
-  powerIsOn = false;
 }

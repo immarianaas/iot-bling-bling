@@ -7,7 +7,7 @@
 class My_Battery
 {
 public:
-    My_Battery();
+    // My_Battery();
     void init();
     void checkBattery();
     void checkBattery10Sec();
@@ -19,9 +19,8 @@ private:
     void handleBatteryAlarm();
     void updateBatteryStatus();
     void triggerAlarm();
-    void shutDown();
-    void turnOn();
     Adafruit_MAX17048 maxlipo;
+    const float lowBatteryThreshold = 30.0;
     unsigned long lastBatteryCheck = 0;
     const unsigned long batteryCheckInterval = 10000; // 10 seconds
     unsigned long last_send = 0;

@@ -27,8 +27,8 @@ void My_LightControl::init()
     pinMode(ACCEL_INTR, INPUT_PULLUP);
     digitalWrite(LED, HIGH);
     Wire.setPins(SDA_PIN, SCL_PIN);
-    attachInterrupt(digitalPinToInterrupt(BUTTON), buttonISR, FALLING);
     attachInterrupt(digitalPinToInterrupt(ACCEL_INTR), accelISR, RISING);
+    attachInterrupt(digitalPinToInterrupt(BUTTON), buttonISR, FALLING);
     ADXL345.begin();
     ADXL345.powerOn();
     ADXL345.setFullResBit(true);
