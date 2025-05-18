@@ -3,21 +3,24 @@
 #include <my_gps.h>
 #include <my_wifi_location.h>
 #include <my_battery.h>
-// #include <my_light_control.h>
+#include <my_light_control.h>
 //// use this devEUI: 0004A30B010651F7
 
 enum SendDataType {
   BATTERY,
   GPS,
+  GPS_REQ,
   WIFI
 };
+
+bool isLoraInit = false;
 
 RTC_DATA_ATTR std::deque<SendDataType> sendDeque;
 
 RTC_DATA_ATTR My_GPS mygps;
 RTC_DATA_ATTR My_Wifi_Location mywifiloc;
 RTC_DATA_ATTR My_Battery mybattery;
-// My_LightControl mylight;
+RTC_DATA_ATTR My_LightControl mylight;
 
 void setup() {
   Serial.begin(115200);
@@ -27,11 +30,10 @@ void setup() {
 
   delay(3000);
 
+  mygps.init();
   mywifiloc.init();
   mybattery.init();
-  // mylight.init();
-
-  sendDeque.push_back(SendDataType::BATTERY);
+  mylight.init();
 
 }
 
@@ -57,6 +59,7 @@ void handleLoraWanStateMachine() {
     }
     case DEVICE_STATE_SEND:
     {
+      isLoraInit = true;
       Serial.println("DEVICE_STATE_SEND");
       if (sendDeque.empty())
       {
@@ -69,7 +72,6 @@ void handleLoraWanStateMachine() {
       switch ( data ) {
         case BATTERY:
           mybattery.prepare_battery_msg(appData, appDataSize);
-          mybattery.updateLastSendTime();
           Serial.println(appData[0], HEX);
           Serial.println("[DEVICE_STATE_SEND]: battery");
           break;
@@ -77,9 +79,12 @@ void handleLoraWanStateMachine() {
           mygps.prepare_coords_msg(appData, appDataSize);
           Serial.println("[DEVICE_STATE_SEND]: gps");
           break;
+        case GPS_REQ:
+          mygps.prepare_coords_msg_req(appData, appDataSize);
+          Serial.println("[DEVICE_STATE_SEND]: gps_req");
+          break;
         case WIFI:
           mywifiloc.prepare_wifi_msg(appData, appDataSize);
-          mywifiloc.updateLastSendTime();
           Serial.println("[DEVICE_STATE_SEND]: wifi");
           break;
       }
@@ -91,17 +96,13 @@ void handleLoraWanStateMachine() {
     }
     case DEVICE_STATE_CYCLE:
     {
-      // Serial.println("DEVICE_STATE_CYCLE");
+      Serial.println("DEVICE_STATE_CYCLE");
       // Schedule next packet transmission
       txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND );
       LoRaWAN.cycle(txDutyCycleTime);
-      Serial.print("txDutyCycleTime=");
-      Serial.println(txDutyCycleTime);
       deviceState = DEVICE_STATE_SLEEP;
       break;
     }
-    case DEVICE_CYCLE_WAIT:
-      break;
     case DEVICE_STATE_SLEEP:
     {
       // Serial.println("DEVICE_STATE_SLEEP");
@@ -120,21 +121,21 @@ bool needsToReply = true;
 
 
 void update_deque() {
-  if (mybattery.shouldUpdate())
+  if (mybattery.shouldUpdate()) // BATTERY_SEND_INTERVAL (60 sec)
   {
     sendDeque.push_back(SendDataType::BATTERY);
     mybattery.updateLastSendTime();
-    // deviceState = DEVICE_STATE_SEND;
     Serial.println("[update_deque]: push_back(BATTERY)");
   }
 
-  if (0)//mywifiloc.shouldUpdate(1))
+  if (mywifiloc.shouldUpdate(mylight.is_active()))
   {
     sendDeque.push_back(SendDataType::WIFI);
+    mywifiloc.updateLastSendTime();
     Serial.println("[update_deque]: push_back(WIFI)");
   }
 
-  if (0)//mygps.shouldUpdate(1))
+  if (mygps.shouldUpdate(mylight.is_active()))
   {
     sendDeque.push_back(SendDataType::GPS);
     Serial.println("[update_deque]: push_back(GPS)");
@@ -152,12 +153,13 @@ void handle_downlink() {
     // TODO: request buzzer
     lastDownlinkMessage[0] = 0;
     Serial.println("[handle_downlink]: 0x01: request buzzer");
+    mybattery.request_buzzer();
     return;
   }
 
   if (lastDownlinkMessage[0] == 0x02)
   {
-    sendDeque.push_front(SendDataType::GPS);
+    sendDeque.push_front(SendDataType::GPS_REQ);
     lastDownlinkMessage[0] = 0;
     Serial.println("[handle_downlink]: 0x02: request GPS");
 
@@ -173,9 +175,13 @@ void handle_downlink() {
 
 void loop()
 {
-  handleLoraWanStateMachine();
+  mybattery.handle_battery(); // does stuff every 60 seconds (BATTERY_UPDATE_INTERVAL)
+  mybattery.handle_buzzer();
+  mylight.light_ctrl_active();
 
-  // mylight.light_ctrl_active();
+  handleLoraWanStateMachine();
+  if (!isLoraInit) return;
+
   handle_downlink();
   update_deque();
 

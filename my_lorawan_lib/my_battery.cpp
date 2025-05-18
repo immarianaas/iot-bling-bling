@@ -25,14 +25,12 @@ void My_Battery::init() // old
         // triggerAlarm();
 
         delay(500);
-
     }
 
     Serial.println("Smart Bike Light Initialized");
     lastBatteryCheck = millis();
     // powerShutdownTime = millis() + shutdownDelay;  // Set time to turn off power
 }
-
 
 // void My_Battery::init()
 // {
@@ -43,7 +41,6 @@ void My_Battery::init() // old
 //     //Wire.begin();
 //     //delay(300);
 
-    
 //     i2c.setPins(SDA_PIN, SCL_PIN);
 //     // maxlipo.begin(&i2c); // Adafruit_MAX1704X
 //     while (!maxlipo.begin(&i2c))
@@ -68,14 +65,26 @@ void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
     }
 
     msg_size = 2;
-    updateBatteryStatus();
     msg_buffer[1] = batteryPercent;
+}
+
+bool My_Battery::update_battery_x_sec()
+{
+    unsigned long now = millis();
+    // Check battery every 60 seconds
+    if (now - lastBatteryCheck >= BATTERY_UPDATE_INTERVAL)
+    {
+        lastBatteryCheck = now;
+        updateBatteryStatus();
+        return true;
+    }
+    return false;
 }
 
 void My_Battery::updateBatteryStatus()
 {
     float obtainedPercent = maxlipo.cellPercent();
-    
+
     if (isnan(obtainedPercent))
         batteryPercent = -1;
     else
@@ -85,7 +94,6 @@ void My_Battery::updateBatteryStatus()
     Serial.println(batteryPercent);
 }
 
-
 bool My_Battery::shouldUpdate()
 {
     return millis() - last_send > BATTERY_SEND_INTERVAL;
@@ -94,6 +102,7 @@ void My_Battery::updateLastSendTime()
 {
     last_send = millis();
 }
+
 void My_Battery::checkBattery10Sec()
 {
     unsigned long now = millis();
@@ -125,7 +134,7 @@ void My_Battery::checkBattery()
     Serial.println(" %");
 
     if (percent < lowBatteryThreshold)
-    {   
+    {
         triggerAlarm();
         Serial.println("LOW BATTERY! Triggering alarm and shutdown...");
     }
@@ -134,7 +143,38 @@ void My_Battery::checkBattery()
 void My_Battery::handleBatteryAlarm()
 {
     if (batteryPercent != -1 && batteryPercent < lowBatteryThreshold)
-    {}
+    {
+    }
+}
+
+void My_Battery::handle_battery()
+{
+    // first update the battery every 60 seconds
+    bool updated = update_battery_x_sec();
+    if (!updated)
+        return;
+
+    if (batteryPercent == -1) return;
+
+    if (batteryPercent <= SECOND_ALARM_TRIGGER  && !secondAlarm)
+    {
+        secondAlarm = true;
+        triggerAlarm();
+    }
+    else if (batteryPercent <= FIRST_ALARM_TRIGGER  && !firstAlarm)
+    {
+        firstAlarm = true;
+        triggerAlarm();
+    }
+
+    if (secondAlarm && batteryPercent > SECOND_ALARM_TRIGGER)
+    {
+        secondAlarm = false;
+    }
+    else if (firstAlarm && batteryPercent > FIRST_ALARM_TRIGGER)
+    {
+        firstAlarm = false;
+    }
 }
 
 void My_Battery::triggerAlarm()
@@ -148,3 +188,23 @@ void My_Battery::triggerAlarm()
     }
 }
 
+
+void My_Battery::request_buzzer()
+{
+    if (isBuzzing)
+        return; // ignore request if it is buzzing already
+
+    isBuzzing = true;
+    buzzerStart = millis();
+    tone(BUZZER, 1000);
+}
+
+void My_Battery::handle_buzzer()
+{
+    if (!isBuzzing) return; // nothing to do
+    if (millis() - buzzerStart > BUZZER_REQ_TIME)
+    {
+        noTone(BUZZER);
+        isBuzzing = false;
+    }
+}

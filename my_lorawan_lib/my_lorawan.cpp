@@ -53,7 +53,7 @@ uint16_t userChannelsMask[6] = {0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 LoRaMacRegion_t loraWanRegion = ACTIVE_REGION;
 
 /*LoraWan Class, Class A and Class C are supported*/
-DeviceClass_t loraWanClass = CLASS_A;
+DeviceClass_t loraWanClass = CLASS_C; // original A
 
 /*the application data transmission duty cycle.  value in [ms].*/
 uint32_t appTxDutyCycle = 15000;

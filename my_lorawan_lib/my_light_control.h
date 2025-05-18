@@ -7,6 +7,8 @@ public:
     My_LightControl();
     void init();
     void light_ctrl_active();
+    bool is_active();
+    
 private:
     void static IRAM_ATTR accelISR();
     void static IRAM_ATTR buttonISR();
@@ -14,6 +16,8 @@ private:
     bool accel_activity();
     bool accel_inactivity();
     bool dark();
+    bool is_dark();
+    bool is_accel_activity();
     DFRobot_ADXL345_I2C ADXL345;
 };
 #endif // My_LIGHT_CONTROL_H
