@@ -5,7 +5,8 @@ My_Battery mybattery;
 void setup()
 {
   Serial.begin(115200);
-  delay(500);
+  delay(1000);
+  Serial.println("start");
   mybattery.init();
 }
 

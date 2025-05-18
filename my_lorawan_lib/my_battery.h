@@ -2,13 +2,15 @@
 #define My_BATTERY_H
 
 #include "Adafruit_MAX1704X.h"
-#define BATTERY_SEND_INTERVAL 2 * 60 * 1000 // 2 minutes
+// #define BATTERY_SEND_INTERVAL 2 * 60 * 1000 // 2 minutes
+#define BATTERY_SEND_INTERVAL 5 * 1000 // 5 seconds
 
 class My_Battery
 {
 public:
     // My_Battery();
     void init();
+    // void init_old();
     void checkBattery();
     void checkBattery10Sec();
     bool shouldUpdate();
@@ -19,6 +21,7 @@ private:
     void handleBatteryAlarm();
     void updateBatteryStatus();
     void triggerAlarm();
+    // TwoWire i2c;
     Adafruit_MAX17048 maxlipo;
     const float lowBatteryThreshold = 30.0;
     unsigned long lastBatteryCheck = 0;

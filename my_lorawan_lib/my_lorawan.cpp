@@ -16,19 +16,19 @@ CubeCell_NeoPixel pixels(1, RGB, NEO_GRB + NEO_KHZ800);
 #include "loramac/region/RegionAS923.h"
 #endif
 
-#if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK_V3) || defined(WIRELESS_STICK)
-#include <Wire.h>
-#include "HT_SSD1306Wire.h"
-RTC_DATA_ATTR uint8_t ifDisplayAck = 0;
-RTC_DATA_ATTR uint8_t isDispayOn = 0;
-#ifdef WIRELESS_STICK_V3
-RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_64_32, RST_OLED);
-; // addr , freq , i2c group , resolution , rst
-#else
-RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
-; // addr , freq , i2c group , resolution , rst
-#endif
-#endif
+// #if defined(WIFI_LORA_32_V3) || defined(WIFI_LORA_32_V2) || defined(WIFI_LORA_32) || defined(WIRELESS_STICK_V3) || defined(WIRELESS_STICK)
+// #include <Wire.h>
+// #include "HT_SSD1306Wire.h"
+// RTC_DATA_ATTR uint8_t ifDisplayAck = 0;
+// RTC_DATA_ATTR uint8_t isDispayOn = 0;
+// #ifdef WIRELESS_STICK_V3
+// RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_64_32, RST_OLED);
+// ; // addr , freq , i2c group , resolution , rst
+// #else
+// RTC_DATA_ATTR SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
+// ; // addr , freq , i2c group , resolution , rst
+// #endif
+// #endif
 
 /*loraWan default Dr when adr disabled*/
 #ifdef REGION_US915
@@ -65,7 +65,7 @@ bool overTheAirActivation = true;
 bool loraWanAdr = false;
 
 /* Indicates if the node is sending confirmed or unconfirmed messages */
-bool isTxConfirmed = true; // originally true
+bool isTxConfirmed = true;
 
 /* Application port */
 uint8_t appPort = 1;
@@ -201,6 +201,7 @@ bool SendFrame(void)
  */
 static void OnTxNextPacketTimerEvent(void)
 {
+	Serial.println("[OnTxNextPacketTimerEvent]");
 	MibRequestConfirm_t mibReq;
 	LoRaMacStatus_t status;
 
@@ -571,7 +572,10 @@ void LoRaWanClass::init(DeviceClass_t lorawanClass, LoRaMacRegion_t region)
 	LoRaMacPrimitive.MacMlmeIndication = MlmeIndication;
 	LoRaMacCallback.GetBatteryLevel = BoardGetBatteryLevel;
 	LoRaMacCallback.GetTemperatureLevel = NULL;
+	Serial.println("before LoRaMacInitialization");
 	LoRaMacInitialization(&LoRaMacPrimitive, &LoRaMacCallback, region);
+	Serial.println("after LoRaMacInitialization");
+
 	TimerStop(&TxNextPacketTimer);
 	TimerInit(&TxNextPacketTimer, OnTxNextPacketTimerEvent);
 

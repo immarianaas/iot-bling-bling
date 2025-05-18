@@ -2,33 +2,60 @@
 #include "Adafruit_MAX1704X.h"
 #include <Wire.h>
 
-#define SDA_PIN 6
-#define SCL_PIN 7
+// #define SDA_PIN 6
+// #define SCL_PIN 7
+
+#define SDA_PIN 9
+#define SCL_PIN 2 // 8 from the corner on the left
 
 #define BUZZER 18
 
-// My_Battery::My_Battery() : maxlipo()
+// My_Battery::My_Battery() : i2c(2)
 // {
 // }
 
-void My_Battery::init()
+void My_Battery::init() // old
 {
     pinMode(BUZZER, OUTPUT);
+    Wire.begin(SDA_PIN, SCL_PIN);
 
-    // Wire.begin(SDA_PIN, SCL_PIN);
-    Wire.setPins(SDA_PIN, SCL_PIN);
-    //Wire.begin();
-    delay(300);
-    // maxlipo.begin(&Wire);
-    // while (!maxlipo.begin())
-    // {
-    //     Serial.println("MAX17048 not found!");
-    //     // triggerAlarm();
-    // }
+    while (!maxlipo.begin())
+    {
+        Serial.println(F("MAX17048 not found!"));
+        // triggerAlarm();
+
+        delay(500);
+
+    }
 
     Serial.println("Smart Bike Light Initialized");
     lastBatteryCheck = millis();
+    // powerShutdownTime = millis() + shutdownDelay;  // Set time to turn off power
 }
+
+
+// void My_Battery::init()
+// {
+//     // pinMode(BUZZER, OUTPUT);
+
+//     // Wire.begin(SDA_PIN, SCL_PIN);
+//     // Wire.setPins(SDA_PIN, SCL_PIN);
+//     //Wire.begin();
+//     //delay(300);
+
+    
+//     i2c.setPins(SDA_PIN, SCL_PIN);
+//     // maxlipo.begin(&i2c); // Adafruit_MAX1704X
+//     while (!maxlipo.begin(&i2c))
+//     {
+//         Serial.println("MAX17048 not found!");
+//         // triggerAlarm();
+//         delay(1000);
+//     }
+
+//     Serial.println("Smart Bike Light Initialized");
+//     lastBatteryCheck = millis();
+// }
 
 void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
 {
@@ -41,18 +68,23 @@ void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
     }
 
     msg_size = 2;
+    updateBatteryStatus();
     msg_buffer[1] = batteryPercent;
-    return;
 }
 
 void My_Battery::updateBatteryStatus()
 {
     float obtainedPercent = maxlipo.cellPercent();
+    
     if (isnan(obtainedPercent))
         batteryPercent = -1;
     else
         batteryPercent = (int)obtainedPercent;
+
+    Serial.print("batteryPercent=");
+    Serial.println(batteryPercent);
 }
+
 
 bool My_Battery::shouldUpdate()
 {
@@ -67,7 +99,7 @@ void My_Battery::checkBattery10Sec()
     unsigned long now = millis();
     // Check battery every 10 seconds
 
-    if (now - lastBatteryCheck >= batteryCheckInterval)
+    if (now - lastBatteryCheck >= 10000)
     {
         lastBatteryCheck = now;
         checkBattery();

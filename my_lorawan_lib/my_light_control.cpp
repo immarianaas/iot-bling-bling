@@ -1,6 +1,10 @@
 #include <my_light_control.h>
-#define SDA_PIN 6
-#define SCL_PIN 7
+// #define SDA_PIN 6
+// #define SCL_PIN 7
+
+#define SDA_PIN 9
+#define SCL_PIN 2
+
 #define LED 8
 #define PHOTO 4
 #define BUTTON 5
