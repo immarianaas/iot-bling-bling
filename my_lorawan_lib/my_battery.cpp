@@ -2,19 +2,12 @@
 #include "Adafruit_MAX1704X.h"
 #include <Wire.h>
 
-// #define SDA_PIN 6
-// #define SCL_PIN 7
-
 #define SDA_PIN 9
-#define SCL_PIN 2 // 8 from the corner on the left
+#define SCL_PIN 2
 
 #define BUZZER 18
 
-// My_Battery::My_Battery() : i2c(2)
-// {
-// }
-
-void My_Battery::init() // old
+void My_Battery::init()
 {
     pinMode(BUZZER, OUTPUT);
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -29,30 +22,9 @@ void My_Battery::init() // old
 
     Serial.println("Smart Bike Light Initialized");
     lastBatteryCheck = millis();
-    // powerShutdownTime = millis() + shutdownDelay;  // Set time to turn off power
 }
 
-// void My_Battery::init()
-// {
-//     // pinMode(BUZZER, OUTPUT);
 
-//     // Wire.begin(SDA_PIN, SCL_PIN);
-//     // Wire.setPins(SDA_PIN, SCL_PIN);
-//     //Wire.begin();
-//     //delay(300);
-
-//     i2c.setPins(SDA_PIN, SCL_PIN);
-//     // maxlipo.begin(&i2c); // Adafruit_MAX1704X
-//     while (!maxlipo.begin(&i2c))
-//     {
-//         Serial.println("MAX17048 not found!");
-//         // triggerAlarm();
-//         delay(1000);
-//     }
-
-//     Serial.println("Smart Bike Light Initialized");
-//     lastBatteryCheck = millis();
-// }
 
 void My_Battery::prepare_battery_msg(uint8_t *msg_buffer, uint8_t &msg_size)
 {

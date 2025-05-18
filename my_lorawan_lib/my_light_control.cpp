@@ -13,18 +13,9 @@
 #define BUTTON_DEBOUNCE_TIME 500
 #define STILL_DELAY_LIGHT_OFF 3000 // 3 seconds before light turns off
 
-const bool ACTIVE = 1;
-const bool PARKED = 0;
-volatile bool accelDetected = false;
-volatile bool buttonPressed = false;
-bool lastButtonState = HIGH; // Previous button state
-bool manual = 0;             // indicates if light manually turned on
-int lightValue = 0;
-bool isActive = false;
-unsigned long lastMoveTime = 0; // timer for light turn off after x time
-unsigned long lastManualToggle = 0;
-// const int stillDelay = 3000; // delay before light goes off in milliseconds
-// const int debounceTime = 200;
+volatile bool accelDetected = false; // used in interrupts (static functions)
+volatile bool buttonPressed = false; // used in interrupts (static functions)
+
 My_LightControl::My_LightControl() : ADXL345(&Wire, 0x53)
 {
 }
@@ -51,7 +42,7 @@ void My_LightControl::init()
     ADXL345.setInactivityX(true);
     ADXL345.setInactivityY(true);
     ADXL345.setInactivityZ(true);
-    ADXL345.setActivityThreshold(15); // Value from 0–255 (~62.5mg per LSB at ±2g)
+    ADXL345.setActivityThreshold(30); // Value from 0–255 (~62.5mg per LSB at ±2g)
     ADXL345.setInactivityThreshold(10);
     ADXL345.setTimeInactivity(5); // 5 seconds
     ADXL345.setRangeSetting(2);   // ±2g range
@@ -81,28 +72,6 @@ void My_LightControl::button()
         Serial.println(manual);
     }
 }
-bool My_LightControl::accel_activity()
-{
-    if (accelDetected)
-    {
-        Serial.println("accelDetected");
-        byte interrupts = ADXL345.getInterruptSource();
-        accelDetected = false;
-        if (!manual)
-        {
-            if (ADXL345.triggered(interrupts, ADXL345_ACTIVITY))
-            {
-                Serial.println("motion detected");
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-    return false;
-}
 
 bool My_LightControl::is_accel_activity()
 {
@@ -113,17 +82,6 @@ bool My_LightControl::is_accel_activity()
     byte interrupts = ADXL345.getInterruptSource();
     accelDetected = false;
     return ADXL345.triggered(interrupts, ADXL345_ACTIVITY);
-}
-
-bool My_LightControl::dark()
-{
-    if (!manual)
-    {
-        lightValue = analogRead(PHOTO);
-        Serial.println("DARK");
-        return lightValue < 30;
-    }
-    return false;
 }
 
 bool My_LightControl::is_dark()
@@ -141,7 +99,6 @@ bool My_LightControl::is_active()
 void My_LightControl::light_ctrl_active()
 {
 
-
     button();
     if (manual)
         return;
@@ -157,8 +114,7 @@ void My_LightControl::light_ctrl_active()
         lastMoveTime = millis();
         Serial.println("Motion and dark: LED ON");
     }
-
-    if (millis() - lastMoveTime > STILL_DELAY_LIGHT_OFF)
+    else if (millis() - lastMoveTime > STILL_DELAY_LIGHT_OFF)
     {
         isActive = false;
         digitalWrite(LED, LOW);

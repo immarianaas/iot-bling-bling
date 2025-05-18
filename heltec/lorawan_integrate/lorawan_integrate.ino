@@ -9,7 +9,6 @@
 enum SendDataType {
   BATTERY,
   GPS,
-  GPS_REQ,
   WIFI
 };
 
@@ -30,7 +29,6 @@ void setup() {
 
   delay(3000);
 
-  // mygps.init();
   mywifiloc.init();
   mybattery.init();
   mylight.init();
@@ -78,10 +76,6 @@ void handleLoraWanStateMachine() {
         case GPS:
           mygps.prepare_coords_msg(appData, appDataSize);
           Serial.println("[DEVICE_STATE_SEND]: gps");
-          break;
-        case GPS_REQ:
-          mygps.prepare_coords_msg(appData, appDataSize);
-          Serial.println("[DEVICE_STATE_SEND]: gps_req");
           break;
         case WIFI:
           mywifiloc.prepare_wifi_msg(appData, appDataSize);
@@ -150,20 +144,17 @@ void handle_downlink() {
 
   if (lastDownlinkMessage[0] == 0x01)
   {
-    // TODO: request buzzer
     lastDownlinkMessage[0] = 0;
-    Serial.println("[handle_downlink]: 0x01: request buzzer");
     mybattery.request_buzzer();
+    Serial.println("[handle_downlink]: 0x01: request buzzer");
     return;
   }
 
   if (lastDownlinkMessage[0] == 0x02)
   {
-    sendDeque.push_front(SendDataType::GPS_REQ);
+    sendDeque.push_front(SendDataType::GPS);
     lastDownlinkMessage[0] = 0;
     Serial.println("[handle_downlink]: 0x02: request GPS");
-
-    // deviceState = DEVICE_STATE_SEND; // NOT SURE IF NECESSARY
     return;
   }
 

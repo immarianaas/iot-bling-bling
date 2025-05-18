@@ -14,9 +14,7 @@
 class My_Battery
 {
 public:
-    // My_Battery();
     void init();
-    // void init_old();
     void checkBattery();
     void checkBattery10Sec();
     void handle_battery();
