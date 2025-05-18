@@ -11,6 +11,7 @@
 #define GPS_RX 0 // 2
 #define GPS_TX 3
 
+#define SEARCH_DATA_MINUTES 1
 // 3 is connected to RX on the GPS sensor!!!
 // 0 is connected to TX on the GPS sensor!!
 // #define GPS_RX 2
@@ -25,7 +26,17 @@ My_GPS::My_GPS() : gps(), GPSerial(1)
 void My_GPS::init()
 {
     float lat, lng;
-    get_coords_long(lat, lng, 3);
+    get_coords_long(lat, lng, SEARCH_DATA_MINUTES);
+}
+
+void My_GPS::get_coords_init()
+{
+    float lat, lng;
+    has_obtained_valid_coords = get_coords(lat, lng);
+}
+
+bool My_GPS::got_valid_coords() {
+    return has_obtained_valid_coords;
 }
 
 bool My_GPS::get_coords_long(float &lat, float &lng, int minutes)
@@ -127,7 +138,7 @@ void My_GPS::prepare_coords_msg(uint8_t *msg_buffer, uint8_t &msg_size)
 void My_GPS::prepare_coords_msg_req(uint8_t *msg_buffer, uint8_t &msg_size)
 {
     float lat, lng;
-    bool ok = get_coords_long(lat, lng, 3);
+    bool ok = get_coords_long(lat, lng, SEARCH_DATA_MINUTES);
     prepare_message(ok, lat, lng, msg_buffer, msg_size);
 }
 

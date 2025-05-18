@@ -141,16 +141,11 @@ bool My_LightControl::is_active()
 void My_LightControl::light_ctrl_active()
 {
 
-    // lightValue = analogRead(PHOTO);
-    // Serial.println(lightValue);
-    // delay(500);
-    // unsigned long currentTime = millis();
 
     button();
     if (manual)
         return;
 
-    is_dark();
     bool accel = is_accel_activity();
     if (accel)
         Serial.println("accel detected");

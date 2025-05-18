@@ -16,6 +16,8 @@ public:
     void prepare_coords_msg(uint8_t *msg_buffer, uint8_t &msg_size);
     void prepare_coords_msg_req(uint8_t *msg_buffer, uint8_t &msg_size);
     bool shouldUpdate(bool activeMode);
+    void get_coords_init();
+    bool got_valid_coords();
 
 private:
     bool get_coords(float &lat, float &lng);
@@ -24,6 +26,7 @@ private:
     TinyGPSPlus gps;
     HardwareSerial GPSerial;
     bool was_already_active = false;
+    bool has_obtained_valid_coords = false;
 };
 
 #endif // My_GPS_H

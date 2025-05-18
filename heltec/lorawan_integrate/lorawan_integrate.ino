@@ -30,7 +30,7 @@ void setup() {
 
   delay(3000);
 
-  mygps.init();
+  // mygps.init();
   mywifiloc.init();
   mybattery.init();
   mylight.init();
@@ -80,7 +80,7 @@ void handleLoraWanStateMachine() {
           Serial.println("[DEVICE_STATE_SEND]: gps");
           break;
         case GPS_REQ:
-          mygps.prepare_coords_msg_req(appData, appDataSize);
+          mygps.prepare_coords_msg(appData, appDataSize);
           Serial.println("[DEVICE_STATE_SEND]: gps_req");
           break;
         case WIFI:
@@ -176,14 +176,18 @@ void handle_downlink() {
 void loop()
 {
   mybattery.handle_battery(); // does stuff every 60 seconds (BATTERY_UPDATE_INTERVAL)
-  mybattery.handle_buzzer();
   mylight.light_ctrl_active();
+
+  if (!mygps.got_valid_coords())
+    mygps.get_coords_init();
 
   handleLoraWanStateMachine();
   if (!isLoraInit) return;
 
+  mybattery.handle_buzzer();
   handle_downlink();
   update_deque();
+  
 
   // mybattery.checkBattery10Sec();
 
