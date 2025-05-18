@@ -15,8 +15,6 @@ void My_Battery::init()
     while (!maxlipo.begin())
     {
         Serial.println(F("MAX17048 not found!"));
-        // triggerAlarm();
-
         delay(500);
     }
 

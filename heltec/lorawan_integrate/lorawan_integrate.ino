@@ -179,29 +179,4 @@ void loop()
   handle_downlink();
   update_deque();
   
-
-  // mybattery.checkBattery10Sec();
-
-  /*
-  if (lastDownlinkMessage[0] != 0)
-  {
-    Serial.print("|");
-    int i = 0;
-    while (lastDownlinkMessage[i] != 0)
-    {
-      Serial.print(lastDownlinkMessage[i++], HEX);
-    }
-    Serial.println("|");
-
-  }
-
-  if (newDownlinkMessage && needsToReply) 
-  {
-    needsToReply = false;
-    deviceState = DEVICE_STATE_SEND;
-  }
-  */
-
-
-
 }
