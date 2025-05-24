@@ -11,7 +11,7 @@
 #define ACCEL_INTR 19 // dunno yet
 
 #define BUTTON_DEBOUNCE_TIME 500
-#define STILL_DELAY_LIGHT_OFF 3000 // 3 seconds before light turns off
+#define STILL_DELAY_LIGHT_OFF 30000 // 30 seconds before light turns off
 
 volatile bool accelDetected = false; // used in interrupts (static functions)
 volatile bool buttonPressed = false; // used in interrupts (static functions)
