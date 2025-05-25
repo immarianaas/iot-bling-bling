@@ -54,7 +54,7 @@ bool My_GPS::get_coords(float &lat, float &lng)
 
 void My_GPS::encode_coord_val_hex(float val, int *arr)
 {
-    int normalized = (uint32_t)(((val + 90.0) / 180.0) * 16777215.0); // 16777216 = 2^(8*3) -1 (highest value written with 4 bytes
+    int normalized = (uint32_t)(((val + 90.0) / 180.0) * 16777215.0); // 16777216 = 2^(8*3) -1 (highest value written with 3 bytes
 
     arr[0] = (normalized >> 16) & 0xFF;
     arr[1] = (normalized >> 8) & 0xFF;
