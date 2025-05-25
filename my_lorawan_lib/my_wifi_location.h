@@ -3,7 +3,7 @@
 #define MY_WIFI_LOCATION_H
 
 #include "Arduino.h"
-#define WIFI_SEND_INTERVAL 1 * 60 * 1000 // 1 minutes
+#define WIFI_SEND_INTERVAL 10 * 60 * 1000 // 10 minutes
 
 class My_Wifi_Location
 {
